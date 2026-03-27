@@ -1,0 +1,99 @@
+{
+  "nobles": [
+    {
+      "id": "N-001",
+      "name": "Mary Stuart",
+      "requirements": {
+        "emerald": 3,
+        "diamond": 3,
+        "sapphire": 3
+      },
+      "prestige": 3
+    },
+    {
+      "id": "N-002",
+      "name": "Charles V",
+      "requirements": {
+        "emerald": 4,
+        "onyx": 4
+      },
+      "prestige": 3
+    },
+    {
+      "id": "N-003",
+      "name": "Francis I",
+      "requirements": {
+        "diamond": 4,
+        "sapphire": 4
+      },
+      "prestige": 3
+    },
+    {
+      "id": "N-004",
+      "name": "Isabella of Castile",
+      "requirements": {
+        "onyx": 4,
+        "ruby": 4
+      },
+      "prestige": 3
+    },
+    {
+      "id": "N-005",
+      "name": "Anne of Brittany",
+      "requirements": {
+        "emerald": 3,
+        "diamond": 3,
+        "ruby": 3
+      },
+      "prestige": 3
+    },
+    {
+      "id": "N-006",
+      "name": "Suleiman the Magnificent",
+      "requirements": {
+        "diamond": 3,
+        "sapphire": 3,
+        "onyx": 3
+      },
+      "prestige": 3
+    },
+    {
+      "id": "N-007",
+      "name": "Catherine de Medici",
+      "requirements": {
+        "sapphire": 3,
+        "onyx": 3,
+        "ruby": 3
+      },
+      "prestige": 3
+    },
+    {
+      "id": "N-008",
+      "name": "Henry VIII",
+      "requirements": {
+        "emerald": 4,
+        "ruby": 4
+      },
+      "prestige": 3
+    },
+    {
+      "id": "N-009",
+      "name": "Elisabeth of Austria",
+      "requirements": {
+        "emerald": 3,
+        "diamond": 3,
+        "onyx": 3
+      },
+      "prestige": 3
+    },
+    {
+      "id": "N-010",
+      "name": "Cosimo de Medici",
+      "requirements": {
+        "sapphire": 4,
+        "ruby": 4
+      },
+      "prestige": 3
+    }
+  ]
+}
