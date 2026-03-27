@@ -1,0 +1,54 @@
+import { useState } from 'react';
+import { Button } from '../design-system/Button';
+
+interface GameSetupProps {
+  onStart: (playerCount: 2 | 3 | 4) => void;
+}
+
+export function GameSetup({ onStart }: GameSetupProps) {
+  const [selectedCount, setSelectedCount] = useState<2 | 3 | 4>(2);
+
+  return (
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="bg-gray-800 p-8 rounded-lg max-w-md w-full">
+        <h1 className="text-4xl font-bold text-center text-white mb-8">Splendor</h1>
+        
+        <div className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-3">
+              Number of Players
+            </label>
+            <div className="grid grid-cols-3 gap-3">
+              {([2, 3, 4] as const).map((count) => (
+                <button
+                  key={count}
+                  onClick={() => setSelectedCount(count)}
+                  className={cn(
+                    'py-3 px-4 rounded-lg font-semibold transition-colors',
+                    selectedCount === count
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  )}
+                >
+                  {count}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          <Button
+            onClick={() => onStart(selectedCount)}
+            className="w-full"
+            size="lg"
+          >
+            Start Game
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function cn(...classes: (string | boolean | undefined)[]) {
+  return classes.filter(Boolean).join(' ');
+}
