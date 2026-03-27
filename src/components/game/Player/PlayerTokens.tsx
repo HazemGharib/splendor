@@ -17,7 +17,7 @@ const gemOrder: GemColor[] = [
 
 export function PlayerTokens({ tokens }: PlayerTokensProps) {
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-1 sm:gap-2 flex-wrap">
       {gemOrder.map((color) => (
         <GemToken key={color} color={color} count={tokens[color]} size="sm" />
       ))}

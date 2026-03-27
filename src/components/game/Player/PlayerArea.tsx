@@ -24,14 +24,14 @@ export function PlayerArea({ player, isCurrentPlayer, onPurchaseReserved, hasPer
   return (
     <div
       className={cn(
-        'bg-gray-800 p-4 rounded-lg border-4',
+        'bg-gray-800 p-3 sm:p-4 rounded-lg border-4',
         playerColorClasses[player.color],
-        isCurrentPlayer && 'ring-4 ring-yellow-400'
+        isCurrentPlayer && 'ring-2 sm:ring-4 ring-yellow-400'
       )}
     >
-      <div className="flex justify-between items-start mb-3">
+      <div className="flex justify-between items-start mb-2 sm:mb-3">
         <div>
-          <h3 className="text-white text-lg font-semibold capitalize">
+          <h3 className="text-white text-base sm:text-lg font-semibold capitalize">
             {player.color} Player
           </h3>
           {isCurrentPlayer && (
@@ -41,7 +41,7 @@ export function PlayerArea({ player, isCurrentPlayer, onPurchaseReserved, hasPer
         <PlayerScore prestige={player.prestige} />
       </div>
       
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         <div>
           <div className="text-xs text-gray-400 mb-1">Tokens</div>
           <PlayerTokens tokens={player.tokens} />
@@ -70,7 +70,7 @@ export function PlayerArea({ player, isCurrentPlayer, onPurchaseReserved, hasPer
         {player.nobles.length > 0 && (
           <div>
             <div className="text-xs text-gray-400 mb-1">Nobles ({player.nobles.length})</div>
-            <div className="text-sm text-purple-400">
+            <div className="text-xs sm:text-sm text-purple-400">
               {player.nobles.map((n) => n.name).join(', ')}
             </div>
           </div>

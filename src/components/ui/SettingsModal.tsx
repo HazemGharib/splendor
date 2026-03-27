@@ -23,15 +23,15 @@ export function SettingsModal() {
       </ModalTrigger>
       <ModalContent>
         <ModalHeader>
-          <ModalTitle>Settings</ModalTitle>
-          <ModalDescription>Configure game preferences</ModalDescription>
+          <ModalTitle className="text-2xl font-bold text-white">Settings</ModalTitle>
+          <ModalDescription className="text-gray-400">Configure game preferences</ModalDescription>
         </ModalHeader>
         
         <div className="space-y-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="font-medium">Colorblind Mode</div>
-              <div className="text-sm text-gray-400">
+              <div className="font-medium text-white">Colorblind Mode</div>
+              <div className="text-sm text-white">
                 Add patterns to gem tokens for better accessibility
               </div>
             </div>

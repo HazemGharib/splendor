@@ -25,9 +25,64 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overscroll-behavior-y: none;
 }
 
 #root {
   width: 100%;
   min-height: 100vh;
+}
+
+/* Smooth scrolling for horizontal scroll areas */
+.overflow-x-auto {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+/* Custom scrollbar styling */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.5);
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.7);
+}
+
+/* Touch optimization */
+@media (hover: none) and (pointer: coarse) {
+  /* Increase touch targets on mobile */
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Disable hover effects on touch devices */
+  .hover\:scale-105:hover {
+    transform: none;
+  }
+  
+  /* Use active state instead */
+  .hover\:scale-105:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Responsive text selection disable for better UX on touch */
+@media (max-width: 640px) {
+  .touch-manipulation {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
 }

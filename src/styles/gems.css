@@ -20,6 +20,23 @@
   clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
 }
 
+/* Add cross pattern for colorblind mode */
+.gem-diamond::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    linear-gradient(0deg, transparent 48%, rgba(0, 0, 0, 0.2) 48%, rgba(0, 0, 0, 0.2) 52%, transparent 52%),
+    linear-gradient(90deg, transparent 48%, rgba(0, 0, 0, 0.2) 48%, rgba(0, 0, 0, 0.2) 52%, transparent 52%);
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.colorblind-mode .gem-diamond::after {
+  opacity: 1;
+}
+
 /* Emerald - Octagonal/rectangular step cut */
 .gem-emerald {
   width: 1.75rem;
@@ -40,6 +57,27 @@
   height: 30%;
   background: rgba(110, 231, 183, 0.6);
   clip-path: polygon(20% 0%, 80% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+/* Add vertical stripes pattern for colorblind mode */
+.gem-emerald::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 0, 0, 0.2) 3px,
+    rgba(0, 0, 0, 0.2) 4px
+  );
+  clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.colorblind-mode .gem-emerald::after {
+  opacity: 1;
 }
 
 /* Sapphire - Oval/cushion cut */
@@ -65,6 +103,27 @@
   transform: rotate(-30deg);
 }
 
+/* Add horizontal stripes pattern for colorblind mode */
+.gem-sapphire::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 0, 0, 0.2) 3px,
+    rgba(0, 0, 0, 0.2) 4px
+  );
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.colorblind-mode .gem-sapphire::after {
+  opacity: 1;
+}
+
 /* Ruby - Square cushion cut */
 .gem-ruby {
   width: 1.75rem;
@@ -87,6 +146,27 @@
   clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%);
 }
 
+/* Add diagonal stripes pattern for colorblind mode */
+.gem-ruby::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 0, 0, 0.2) 3px,
+    rgba(0, 0, 0, 0.2) 4px
+  );
+  clip-path: polygon(15% 0%, 85% 0%, 100% 15%, 100% 85%, 85% 100%, 15% 100%, 0% 85%, 0% 15%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.colorblind-mode .gem-ruby::after {
+  opacity: 1;
+}
+
 /* Onyx - Round cabochon cut */
 .gem-onyx {
   width: 1.75rem;
@@ -107,6 +187,22 @@
   height: 40%;
   background: rgba(156, 163, 175, 0.4);
   border-radius: 50%;
+}
+
+/* Add dotted pattern for colorblind mode */
+.gem-onyx::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 1px, transparent 1px);
+  background-size: 5px 5px;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.colorblind-mode .gem-onyx::after {
+  opacity: 1;
 }
 
 /* Large size variations */
