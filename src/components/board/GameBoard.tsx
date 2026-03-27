@@ -51,51 +51,63 @@ export function GameBoard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-white">Splendor</h1>
+    <div className="min-h-screen bg-gray-950 p-2 sm:p-4 lg:p-6">
+      <div className="max-w-[2000px] mx-auto">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-3 sm:mb-4">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Splendor</h1>
           <div className="flex gap-2">
             <HelpModal />
             <SettingsModal />
           </div>
         </div>
         
+        {/* Turn Indicator */}
         {currentPlayer && (
-          <TurnIndicator
-            currentPlayer={currentPlayer}
-            hasPerformedAction={hasPerformedAction}
-            onEndTurn={endTurn}
-          />
+          <div className="mb-3">
+            <TurnIndicator
+              currentPlayer={currentPlayer}
+              hasPerformedAction={hasPerformedAction}
+              onEndTurn={endTurn}
+            />
+          </div>
         )}
         
-        <TokenSelector
-          supply={tokenSupply}
-          onTakeTokens={handleTakeTokens}
-          disabled={phase === GamePhase.GAME_OVER || hasPerformedAction}
-        />
+        {/* Nobles - Full width row */}
+        <div className="mb-3">
+          <NobleMarket nobles={nobles} disabled={phase === GamePhase.GAME_OVER} />
+        </div>
         
-        <NobleMarket nobles={nobles} disabled={phase === GamePhase.GAME_OVER} />
-        
-        <CardMarket
-          market={cardMarket}
-          onCardClick={purchaseCard}
-          onReserve={reserveCard}
-          playerTokens={currentPlayer?.tokens}
-          playerBonuses={currentPlayer?.bonuses}
-          disabled={phase === GamePhase.GAME_OVER || hasPerformedAction}
-        />
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-          {players.map((player, index) => (
-            <PlayerArea
-              key={player.id}
-              player={player}
-              isCurrentPlayer={index === currentPlayerIndex && phase === GamePhase.PLAYING}
-              onPurchaseReserved={handlePurchaseReserved}
-              hasPerformedAction={hasPerformedAction}
+        {/* Main game area - Two columns on desktop */}
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-3 sm:gap-4">
+          {/* Left column: Card Market */}
+          <CardMarket
+            market={cardMarket}
+            onCardClick={purchaseCard}
+            onReserve={reserveCard}
+            playerTokens={currentPlayer?.tokens}
+            playerBonuses={currentPlayer?.bonuses}
+            disabled={phase === GamePhase.GAME_OVER || hasPerformedAction}
+          />
+          
+          {/* Right column: Token Selector + All Players */}
+          <div className="space-y-3">
+            <TokenSelector
+              supply={tokenSupply}
+              onTakeTokens={handleTakeTokens}
+              disabled={phase === GamePhase.GAME_OVER || hasPerformedAction}
             />
-          ))}
+            
+            {players.map((player, index) => (
+              <PlayerArea
+                key={player.id}
+                player={player}
+                isCurrentPlayer={index === currentPlayerIndex && phase === GamePhase.PLAYING}
+                onPurchaseReserved={handlePurchaseReserved}
+                hasPerformedAction={hasPerformedAction}
+              />
+            ))}
+          </div>
         </div>
       </div>
       

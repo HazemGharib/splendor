@@ -19,17 +19,18 @@ export function ReservedCards({ cards, playerTokens, playerBonuses, onPurchase, 
       <div className="text-xs text-gray-400 mb-2">
         Reserved Cards ({cards.length}/3)
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2 sm:mx-0 sm:px-0">
         {cards.map((card) => {
           const canAfford = RuleEngine.canAffordCard(card.cost, playerTokens, playerBonuses);
           
           return (
-            <DevelopmentCardComponent
-              key={card.id}
-              card={card}
-              onClick={canAfford && onPurchase ? () => onPurchase(card.id) : undefined}
-              disabled={disabled || !canAfford}
-            />
+            <div key={card.id} className="flex-shrink-0">
+              <DevelopmentCardComponent
+                card={card}
+                onClick={canAfford && onPurchase ? () => onPurchase(card.id) : undefined}
+                disabled={disabled || !canAfford}
+              />
+            </div>
           );
         })}
       </div>

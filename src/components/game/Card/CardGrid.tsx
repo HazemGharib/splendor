@@ -14,27 +14,29 @@ interface CardGridProps {
 
 export function CardGrid({ cards, onCardClick, onReserve, playerTokens, playerBonuses, disabled, level }: CardGridProps) {
   return (
-    <div className="flex flex-col gap-2">
-      <div className="text-sm font-semibold text-gray-400">Level {level}</div>
-      <div className="flex gap-3">
+    <div className="flex flex-col gap-1 sm:gap-2">
+      <div className="text-xs sm:text-sm font-semibold text-gray-400">Level {level}</div>
+      {/* Mobile: horizontal scroll, Desktop: fixed 4-card grid */}
+      <div className="lg:grid lg:grid-cols-4 lg:gap-2 flex gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 -mx-2 px-2 sm:mx-0 sm:px-0">
         {cards.map((card) => {
           const canAfford = playerTokens && playerBonuses 
             ? RuleEngine.canAffordCard(card.cost, playerTokens, playerBonuses)
             : true;
           
           return (
-            <DevelopmentCardComponent
-              key={card.id}
-              card={card}
-              onClick={canAfford && onCardClick ? () => onCardClick(card.id) : undefined}
-              onReserve={onReserve ? () => onReserve(card.id) : undefined}
-              showReserveOption={!!onReserve}
-              disabled={disabled}
-            />
+            <div key={card.id} className="flex-shrink-0 lg:flex-shrink">
+              <DevelopmentCardComponent
+                card={card}
+                onClick={canAfford && onCardClick ? () => onCardClick(card.id) : undefined}
+                onReserve={onReserve ? () => onReserve(card.id) : undefined}
+                showReserveOption={!!onReserve}
+                disabled={disabled}
+              />
+            </div>
           );
         })}
         {Array.from({ length: 4 - cards.length }).map((_, i) => (
-          <div key={`empty-${i}`} className="w-32 h-44 border-2 border-dashed border-gray-700 rounded-lg" />
+          <div key={`empty-${i}`} className="flex-shrink-0 lg:flex-shrink w-36 h-52 border-2 border-dashed border-gray-700 rounded-lg" />
         ))}
       </div>
     </div>

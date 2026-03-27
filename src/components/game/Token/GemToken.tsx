@@ -1,5 +1,6 @@
 import { GemColor } from '../../../models/Card';
 import { cn } from '../../../utils/cn';
+import { useColorblindMode } from '../../../hooks/useColorblindMode';
 
 interface GemTokenProps {
   color: GemColor;
@@ -24,21 +25,55 @@ const sizeClasses = {
   lg: 'w-16 h-16 text-base',
 };
 
+const gemNames: Record<GemColor, string> = {
+  [GemColor.EMERALD]: 'Emerald',
+  [GemColor.DIAMOND]: 'Diamond',
+  [GemColor.SAPPHIRE]: 'Sapphire',
+  [GemColor.ONYX]: 'Onyx',
+  [GemColor.RUBY]: 'Ruby',
+  [GemColor.GOLD]: 'Gold',
+};
+
+const gemLabels: Record<GemColor, string> = {
+  [GemColor.EMERALD]: 'E',
+  [GemColor.DIAMOND]: 'D',
+  [GemColor.SAPPHIRE]: 'S',
+  [GemColor.ONYX]: 'O',
+  [GemColor.RUBY]: 'R',
+  [GemColor.GOLD]: 'G',
+};
+
 export function GemToken({ color, count, onClick, disabled, size = 'md' }: GemTokenProps) {
+  const { enabled: colorblindMode } = useColorblindMode();
+  
   return (
-    <button
-      onClick={onClick}
-      disabled={disabled || count === 0}
-      className={cn(
-        'rounded-full border-4 flex items-center justify-center font-bold transition-transform',
-        colorClasses[color],
-        sizeClasses[size],
-        onClick && !disabled && count !== 0 && 'hover:scale-110 cursor-pointer',
-        disabled && 'opacity-50 cursor-not-allowed'
+    <div className="flex flex-col items-center gap-1">
+      <button
+        onClick={onClick}
+        disabled={disabled || count === 0}
+        className={cn(
+          'rounded-full border-4 flex items-center justify-center font-bold transition-transform relative',
+          colorClasses[color],
+          sizeClasses[size],
+          onClick && !disabled && count !== 0 && 'hover:scale-110 cursor-pointer',
+          disabled && 'opacity-50 cursor-not-allowed'
+        )}
+        aria-label={`${color} token${count !== undefined ? `: ${count}` : ''}`}
+      >
+        {count !== undefined && (
+          <span className="text-slate-950 drop-shadow-lg">
+            {count}
+          </span>
+        )}
+        {colorblindMode && count === undefined && (
+          <span className="text-white font-bold text-xs drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+            {gemLabels[color]}
+          </span>
+        )}
+      </button>
+      {colorblindMode && (
+        <span className="text-xs text-white font-medium">{gemNames[color]}</span>
       )}
-      aria-label={`${color} token${count !== undefined ? `: ${count}` : ''}`}
-    >
-      {count !== undefined && <span className="text-slate-950 drop-shadow-lg">{count}</span>}
-    </button>
+    </div>
   );
 }

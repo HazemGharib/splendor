@@ -64,10 +64,10 @@ export function TokenSelector({ supply, onTakeTokens, disabled }: TokenSelectorP
   const isValid = canTakeTwoSame() || canTakeThreeDifferent();
 
   return (
-    <div className="bg-gray-800 p-4 rounded-lg">
-      <h3 className="text-lg font-semibold mb-4 text-white">Take Tokens</h3>
+    <div className="bg-gray-800 p-3 sm:p-4 rounded-lg h-fit">
+      <h3 className="text-base sm:text-lg font-semibold mb-3 text-white">Take Tokens</h3>
       
-      <div className="flex gap-4 flex-wrap justify-center mb-4">
+      <div className="grid grid-cols-3 lg:grid-cols-2 gap-2 sm:gap-3 mb-3">
         {gemOrder.map((color) => {
           const isSelected = selectedTokens.includes(color);
           const count = supply[color];
@@ -76,15 +76,15 @@ export function TokenSelector({ supply, onTakeTokens, disabled }: TokenSelectorP
           return (
             <div
               key={color}
-              className={`relative transition-transform ${
+              className={`relative transition-transform flex justify-center ${
                 isSelected ? 'ring-4 ring-yellow-400 rounded-full scale-110' : ''
               } ${disabled || isGold ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
               onClick={() => handleTokenClick(color)}
               title={isGold ? 'Gold tokens can only be obtained by reserving cards' : undefined}
             >
-              <GemToken color={color} count={count} />
+              <GemToken color={color} count={count} size="sm" />
               {isSelected && (
-                <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center text-black font-bold text-sm">
+                <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center text-black font-bold text-sm z-10">
                   {selectedTokens.filter((c) => c === color).length}
                 </div>
               )}
@@ -93,24 +93,26 @@ export function TokenSelector({ supply, onTakeTokens, disabled }: TokenSelectorP
         })}
       </div>
 
-      <div className="flex gap-2 justify-center mb-3">
-        <Button onClick={handleClear} variant="secondary" disabled={disabled || selectedTokens.length === 0}>
+      <div className="flex gap-2 mb-2">
+        <Button onClick={handleClear} variant="secondary" disabled={disabled || selectedTokens.length === 0} className="flex-1" size="sm">
           Clear
         </Button>
-        <Button onClick={handleConfirm} variant="default" disabled={disabled || !isValid}>
-          Confirm {canTakeTwoSame() ? '(2 Same)' : canTakeThreeDifferent() ? '(3 Different)' : ''}
+        <Button onClick={handleConfirm} variant="default" disabled={disabled || !isValid} className="flex-1" size="sm">
+          <span className="hidden sm:inline">Confirm</span>
+          <span className="sm:hidden">✓</span>
+          {isValid && <span className="ml-1 text-xs">{canTakeTwoSame() ? '(2)' : '(3)'}</span>}
         </Button>
       </div>
 
-      <div className="text-xs text-gray-400 text-center space-y-1">
-        <p>Select 1 token twice (if 4+ available) OR 3 different tokens</p>
+      <div className="text-xs text-gray-400 space-y-1">
+        <p>2 same (4+) or 3 different</p>
         {selectedTokens.length > 0 && !isValid && (
           <p className="text-yellow-400">
             {selectedTokens.length === 1 && supply[selectedTokens[0]] < 4
-              ? 'Need 4+ tokens to take 2 of the same'
+              ? 'Need 4+ to take 2'
               : selectedTokens.length === 3 && new Set(selectedTokens).size !== 3
-              ? 'All 3 tokens must be different colors'
-              : 'Invalid selection'}
+              ? 'Must be different'
+              : 'Invalid'}
           </p>
         )}
       </div>

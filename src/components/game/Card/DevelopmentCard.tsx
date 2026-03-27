@@ -31,10 +31,10 @@ export function DevelopmentCardComponent({
   return (
     <div
       className={cn(
-        'relative w-36 h-52 rounded-lg border-4 overflow-hidden',
-        'transition-transform',
+        'relative w-36 h-52 rounded-lg border-4 overflow-hidden touch-manipulation',
+        'transition-all duration-200',
         levelColors[card.level],
-        onClick && !disabled && 'hover:scale-105 cursor-pointer',
+        onClick && !disabled && 'hover:scale-105 active:scale-100 cursor-pointer',
         disabled && onClick && 'opacity-50 cursor-not-allowed',
         !onClick && 'opacity-90'
       )}
@@ -68,10 +68,10 @@ export function DevelopmentCardComponent({
               }}
               disabled={disabled}
               className={cn(
-                "mt-2 text-xs px-2 py-1 rounded transition-colors w-full",
+                "mt-2 text-xs px-2 py-1 rounded transition-colors w-full min-h-[32px] touch-manipulation",
                 disabled 
                   ? "bg-gray-800 text-gray-600 cursor-not-allowed"
-                  : "bg-gray-700 hover:bg-gray-600 text-white"
+                  : "bg-gray-700 hover:bg-gray-600 active:bg-gray-500 text-white"
               )}
             >
               Reserve
