@@ -47,12 +47,12 @@ export function DevelopmentCardComponent({
       />
       
       <div className="relative z-10 p-3 flex flex-col h-full">
-        <div className="bg-gradient-to-b from-black/70 to-transparent pb-4 -m-3 mb-0 p-3">
+        <div className="bg-gradient-to-b from-black/70 to-transparent">
           <CardPrestige prestige={card.prestige} />
         </div>
         
-        <div className="flex-1 flex items-center justify-center">
-          <CardBonus bonus={card.bonus} size="lg" />
+        <div className="flex-1 flex items-start justify-start -mt-1">
+          <CardBonus bonus={card.bonus} size="md" />
         </div>
         
         <div className="bg-gradient-to-t from-black/80 to-transparent pt-4 -m-3 mt-0 p-2">

@@ -11,6 +11,7 @@ import { HelpModal } from '../ui/HelpModal';
 import { TurnIndicator } from '../ui/TurnIndicator';
 import { TokenSelector } from '../ui/TokenSelector';
 import { DebugPanel } from '../debug/DebugPanel';
+import { NobleVisitAnnouncement } from '../ui/NobleVisitAnnouncement';
 import { GemColor } from '../../models/Card';
 import { AIService } from '../../services/AIService';
 import { useSplendorTitleDebugTap } from '../../hooks/useDebugEasterEgg';
@@ -224,6 +225,7 @@ export function GameBoard() {
       </div>
       
       {winner && <WinnerModal winner={winner} />}
+      <NobleVisitAnnouncement />
       <DebugPanel />
     </div>
   );

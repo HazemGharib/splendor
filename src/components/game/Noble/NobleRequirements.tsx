@@ -11,6 +11,13 @@ const gemColorsBackground: Record<string, string> = {
   onyx: 'bg-gray-500',
   ruby: 'bg-red-500',
 };
+const gemColorsRing: Record<string, string> = {
+  emerald: 'ring-gem-emerald',
+  diamond: 'ring-gem-diamond',
+  sapphire: 'ring-gem-sapphire',
+  onyx: 'ring-gem-onyx',
+  ruby: 'ring-gem-ruby',
+};
 
 export function NobleRequirements({ requirements }: NobleRequirementsProps) {
   return (
@@ -21,7 +28,7 @@ export function NobleRequirements({ requirements }: NobleRequirementsProps) {
         return (
           <div
             key={color}
-            className={cn('flex items-center justify-between px-2 py-1 h-8 rounded', gemColorsBackground[color])}
+            className={cn(`flex items-center justify-between mx-1 px-2 py-1 h-8 rounded ${gemColorsRing[color]} ring-offset-gray-800 ring-2 ring-offset-1`, gemColorsBackground[color])}
           >
             <span className="text-black">{amount}</span>
           </div>
