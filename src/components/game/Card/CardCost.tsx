@@ -1,6 +1,5 @@
 import { CardCost as CardCostType, GemColor } from '../../../models/Card';
 import { cn } from '../../../utils/cn';
-import { useColorblindMode } from '../../../hooks/useColorblindMode';
 
 interface CardCostProps {
   cost: CardCostType;
@@ -16,19 +15,10 @@ const gemColors: Record<string, string> = {
   ruby: 'text-red-500',
 };
 
-const gemLabels: Record<string, string> = {
-  emerald: 'E',
-  diamond: 'D',
-  sapphire: 'S',
-  onyx: 'O',
-  ruby: 'R',
-};
-
 export function CardCost({ cost, showDiscount, discount }: CardCostProps) {
-  const { enabled: colorblindMode } = useColorblindMode();
   
   return (
-    <div className="flex gap-1 flex-wrap">
+    <div className="flex gap-0.5 flex-wrap">
       {Object.entries(cost).map(([color, amount]) => {
         if (!amount) return null;
         
@@ -39,8 +29,8 @@ export function CardCost({ cost, showDiscount, discount }: CardCostProps) {
           <div
             key={color}
             className={cn(
-              'flex items-center gap-0.5 px-2 py-1 rounded text-xs font-bold',
-              'bg-gray-800 border border-gray-700',
+              'flex items-center gap-1 px-1 py-1 rounded text-xs font-bold',
+              'bg-gray-900 border border-gray-700',
               gemColors[color]
             )}
           >
@@ -48,9 +38,7 @@ export function CardCost({ cost, showDiscount, discount }: CardCostProps) {
             {showDiscount && discountAmount > 0 && (
               <span className="line-through opacity-50 text-xs">{amount}</span>
             )}
-            <span className="capitalize text-xs ml-1">
-              {colorblindMode ? gemLabels[color] : color[0]}
-            </span>
+            <div className={cn('gem-bonus z-10', `gem-${color} gem-${color}-xs`)} />
           </div>
         );
       })}

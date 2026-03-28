@@ -31,7 +31,7 @@ export function DevelopmentCardComponent({
   return (
     <div
       className={cn(
-        'relative w-36 h-52 rounded-lg border-4 overflow-hidden touch-manipulation',
+        'relative w-44 h-60 rounded-lg border-4 overflow-hidden touch-manipulation',
         'transition-all duration-200',
         levelColors[card.level],
         onClick && !disabled && 'hover:scale-105 active:scale-100 cursor-pointer',
@@ -55,7 +55,7 @@ export function DevelopmentCardComponent({
           <CardBonus bonus={card.bonus} size="lg" />
         </div>
         
-        <div className="bg-gradient-to-t from-black/80 to-transparent pt-4 -m-3 mt-0 p-3">
+        <div className="bg-gradient-to-t from-black/80 to-transparent pt-4 -m-3 mt-0 p-2">
           <div className="min-h-[52px] flex items-end">
             <CardCost cost={card.cost} />
           </div>
