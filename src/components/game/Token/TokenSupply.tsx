@@ -19,9 +19,12 @@ const gemOrder: GemColor[] = [
 
 export function TokenSupplyComponent({ supply, onTakeToken, disabled }: TokenSupplyProps) {
   return (
-    <div className="bg-gray-800 p-4 rounded-lg">
-      <h3 className="text-lg font-semibold mb-4 text-white">Token Supply</h3>
-      <div className="flex gap-4 flex-wrap justify-center">
+    <div className="bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 p-4 sm:p-5 rounded-2xl border border-gray-700/50 shadow-xl">
+      <h3 className="text-base sm:text-lg font-bold mb-4 text-white flex items-center gap-2">
+        <span className="text-2xl">🏦</span>
+        Token Supply
+      </h3>
+      <div className="flex gap-3 sm:gap-4 flex-wrap justify-center p-2 bg-gray-900/50 rounded-xl">
         {gemOrder.map((color) => (
           <TokenPile
             key={color}
