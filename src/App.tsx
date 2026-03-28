@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { GameBoard } from './components/board/GameBoard';
+import { SplendorSoundtrack } from './components/audio/SplendorSoundtrack';
 import { useColorblindMode } from './hooks/useColorblindMode';
 import { useDebugJewelKeyboardEgg } from './hooks/useDebugEasterEgg';
 
@@ -15,7 +16,12 @@ function App() {
     }
   }, [colorblindMode]);
   
-  return <GameBoard />;
+  return (
+    <>
+      <SplendorSoundtrack />
+      <GameBoard />
+    </>
+  );
 }
 
 export default App;

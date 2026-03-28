@@ -3,6 +3,7 @@ import { Button } from '../design-system/Button';
 import { useSplendorTitleDebugTap } from '../../hooks/useDebugEasterEgg';
 import { PlayerColor, assignPlayerColors } from '../../models/Player';
 import { cn } from '../../utils/cn';
+import { primeAudioFromUserGesture } from '../../audio/splendorSoundtrackPlayer';
 
 interface GameSetupProps {
   onStart: (
@@ -204,13 +205,14 @@ export function GameSetup({ onStart }: GameSetupProps) {
                 )}
 
                 <Button
-                  onClick={() =>
+                  onClick={() => {
+                    primeAudioFromUserGesture();
                     onStart(
                       selectedCount,
                       playAgainstAI ? selectedCount - 1 : 0,
                       playAgainstAI ? yourColor : seatColors
-                    )
-                  }
+                    );
+                  }}
                   className="w-full shadow-lg"
                   size="lg"
                 >
