@@ -12,7 +12,7 @@ export function PlayerBonuses({ bonuses }: PlayerBonusesProps) {
     .map(([color, count]) => ({ color: color as CardBonusType, count }));
 
   if (bonusEntries.length === 0) {
-    return <div className="text-xs text-gray-500">No bonuses yet</div>;
+    return <div className="text-xs text-gray-300 italic">No bonuses yet</div>;
   }
 
   return (

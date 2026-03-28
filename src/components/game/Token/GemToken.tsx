@@ -11,12 +11,12 @@ interface GemTokenProps {
 }
 
 const colorClasses: Record<GemColor, string> = {
-  [GemColor.EMERALD]: 'bg-gem-emerald border-green-600',
-  [GemColor.DIAMOND]: 'bg-gem-diamond border-gray-300',
-  [GemColor.SAPPHIRE]: 'bg-gem-sapphire border-blue-600',
-  [GemColor.ONYX]: 'bg-gem-onyx border-gray-600',
-  [GemColor.RUBY]: 'bg-gem-ruby border-red-600',
-  [GemColor.GOLD]: 'bg-gem-gold border-yellow-600',
+  [GemColor.EMERALD]: 'bg-gradient-to-br from-emerald-400 via-emerald-600 to-emerald-800 border-emerald-500',
+  [GemColor.DIAMOND]: 'bg-gradient-to-br from-gray-100 via-gray-300 to-gray-500 border-gray-400',
+  [GemColor.SAPPHIRE]: 'bg-gradient-to-br from-blue-400 via-blue-600 to-blue-800 border-blue-500',
+  [GemColor.ONYX]: 'bg-gradient-to-br from-gray-600 via-gray-800 to-black border-gray-700',
+  [GemColor.RUBY]: 'bg-gradient-to-br from-red-400 via-red-600 to-red-800 border-red-500',
+  [GemColor.GOLD]: 'bg-gradient-to-br from-yellow-300 via-yellow-500 to-yellow-700 border-yellow-500',
 };
 
 const sizeClasses = {
@@ -52,21 +52,38 @@ export function GemToken({ color, count, onClick, disabled, size = 'md' }: GemTo
         onClick={onClick}
         disabled={disabled || count === 0}
         className={cn(
-          'rounded-full border-4 flex items-center justify-center font-bold transition-transform relative',
+          'rounded-full border-[3px] flex items-center justify-center font-bold transition-all duration-300 relative',
           colorClasses[color],
           sizeClasses[size],
-          onClick && !disabled && count !== 0 && 'hover:scale-110 cursor-pointer',
+          onClick && !disabled && count !== 0 && 'hover:scale-110 hover:-translate-y-1 cursor-pointer active:scale-105 active:translate-y-0',
           disabled && 'opacity-50 cursor-not-allowed'
         )}
+        style={{
+          boxShadow: onClick && !disabled && count !== 0 
+            ? '0 12px 24px rgba(0,0,0,0.4), 0 6px 12px rgba(0,0,0,0.3), inset 0 -4px 8px rgba(0,0,0,0.25), inset 0 4px 12px rgba(255,255,255,0.4), inset 0 -1px 2px rgba(0,0,0,0.3)'
+            : '0 8px 16px rgba(0,0,0,0.3), 0 4px 8px rgba(0,0,0,0.2), inset 0 -3px 6px rgba(0,0,0,0.2), inset 0 3px 8px rgba(255,255,255,0.35)',
+          transform: onClick && !disabled && count !== 0 ? 'perspective(1000px)' : undefined
+        }}
         aria-label={`${color} token${count !== undefined ? `: ${count}` : ''}`}
       >
+        {/* Top highlight for glossy 3D effect */}
+        <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/50 via-white/10 to-transparent pointer-events-none" 
+             style={{ clipPath: 'ellipse(40% 30% at 50% 20%)' }} 
+        />
+        
+        {/* Bottom shadow for depth */}
+        <div className="absolute inset-0 rounded-full bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" 
+             style={{ clipPath: 'ellipse(45% 25% at 50% 85%)' }} 
+        />
+        
         {count !== undefined && (
-          <span className="text-slate-950 drop-shadow-lg">
+          <span className="text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] font-extrabold relative z-10 text-shadow-lg" 
+                style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.4)' }}>
             {count}
           </span>
         )}
         {colorblindMode && count === undefined && (
-          <span className="text-white font-bold text-xs drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+          <span className="text-white font-bold text-xs drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] relative z-10">
             {gemLabels[color]}
           </span>
         )}

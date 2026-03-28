@@ -5,6 +5,7 @@ import { TokenInventory } from '../../models/Player';
 import { GemToken } from '../game/Token/GemToken';
 import { Button } from '../design-system/Button';
 import { RuleEngine } from '../../services/RuleEngine';
+import { cn } from '../../utils/cn';
 
 interface TokenSelectorProps {
   supply: TokenSupply;
@@ -103,23 +104,28 @@ export function TokenSelector({ supply, playerTokens, onTakeTokens, disabled }: 
   };
 
   return (
-    <div className="bg-gray-800 p-3 sm:p-4 rounded-lg h-fit">
-      <h3 className="text-base sm:text-lg font-semibold mb-3 text-white">Take Tokens</h3>
+    <div className="bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 p-4 sm:p-5 rounded-2xl h-fit border border-gray-700/50 shadow-xl">
+      <h3 className="text-base sm:text-lg font-bold mb-4 text-white flex items-center gap-2">
+        <span className="text-2xl">💎</span>
+        Take Tokens
+      </h3>
       
       {hasMaxTokens && (
-        <div className="mb-3 p-2 bg-red-900/30 border border-red-500/50 rounded text-xs text-red-400">
-          You have 10 tokens (max). You can only purchase cards this turn.
+        <div className="mb-4 p-3 bg-red-950/40 backdrop-blur-sm border border-red-500/30 rounded-lg text-xs text-red-300 flex items-center gap-2">
+          <span className="text-lg">⚠️</span>
+          <span>You have 10 tokens (max). You can only purchase cards this turn.</span>
         </div>
       )}
       
       {!hasMaxTokens && totalPlayerTokens >= 8 && (
-        <div className="mb-3 p-2 bg-yellow-900/30 border border-yellow-500/50 rounded text-xs text-yellow-400">
-          Token limit: {totalPlayerTokens}/10
+        <div className="mb-4 p-3 bg-yellow-950/40 backdrop-blur-sm border border-yellow-500/30 rounded-lg text-xs text-yellow-300 flex items-center gap-2">
+          <span className="text-lg">⚡</span>
+          <span>Token limit: {totalPlayerTokens}/10</span>
         </div>
       )}
       
-      <div className="grid grid-cols-3 lg:grid-cols-2 gap-2 sm:gap-3 mb-3">
-        {gemOrder.map((color) => {
+      <div className="grid grid-cols-3 lg:grid-cols-2 gap-3 sm:gap-4 mb-4 p-2 bg-gray-900/50 rounded-xl">{
+        gemOrder.map((color) => {
           const isSelected = selectedTokens.includes(color);
           const count = supply[color];
           const isGold = color === GemColor.GOLD;
@@ -127,15 +133,18 @@ export function TokenSelector({ supply, playerTokens, onTakeTokens, disabled }: 
           return (
             <div
               key={color}
-              className={`relative transition-transform flex justify-center ${
-                isSelected ? 'ring-4 ring-yellow-400 rounded-full scale-110' : ''
-              } ${effectivelyDisabled || isGold ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              className={cn(
+                'relative transition-all duration-300 flex justify-center p-2 rounded-xl',
+                isSelected && 'bg-yellow-500/20 ring-4 ring-yellow-400/80 scale-105 shadow-lg shadow-yellow-500/30',
+                !isSelected && !effectivelyDisabled && !isGold && 'hover:bg-gray-700/30',
+                effectivelyDisabled || isGold ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
+              )}
               onClick={() => handleTokenClick(color)}
               title={isGold ? 'Gold tokens can only be obtained by reserving cards' : undefined}
             >
               <GemToken color={color} count={count} size="sm" />
               {isSelected && (
-                <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center text-black font-bold text-sm z-10">
+                <div className="absolute -top-1 -right-1 w-7 h-7 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full flex items-center justify-center text-gray-900 font-bold text-sm z-10 shadow-lg animate-pulse">
                   {selectedTokens.filter((c) => c === color).length}
                 </div>
               )}
@@ -144,21 +153,36 @@ export function TokenSelector({ supply, playerTokens, onTakeTokens, disabled }: 
         })}
       </div>
 
-      <div className="flex gap-2 mb-2">
-        <Button onClick={handleClear} variant="secondary" disabled={effectivelyDisabled || selectedTokens.length === 0} className="flex-1" size="sm">
+      <div className="flex gap-2 mb-3">
+        <Button 
+          onClick={handleClear} 
+          variant="secondary" 
+          disabled={effectivelyDisabled || selectedTokens.length === 0} 
+          className="flex-1 font-semibold" 
+          size="sm"
+        >
           Clear
         </Button>
-        <Button onClick={handleConfirm} variant="default" disabled={effectivelyDisabled || !isValid} className="flex-1" size="sm">
+        <Button 
+          onClick={handleConfirm} 
+          variant="default" 
+          disabled={effectivelyDisabled || !isValid} 
+          className="flex-1 font-semibold bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800" 
+          size="sm"
+        >
           <span className="hidden sm:inline">Confirm</span>
           <span className="sm:hidden">✓</span>
-          {isValid && <span className="ml-1 text-xs">{canTakeTwoSame() ? '(2)' : '(3)'}</span>}
+          {isValid && <span className="ml-1 text-xs opacity-90">{canTakeTwoSame() ? '(×2)' : '(×3)'}</span>}
         </Button>
       </div>
 
-      <div className="text-xs text-gray-400 space-y-1">
-        <p>2 same (4+) or 3 different</p>
+      <div className="text-xs space-y-1.5 bg-gray-900/60 p-3 rounded-lg border border-gray-700/30">
+        <p className="text-gray-300 font-medium">📋 Rules:</p>
+        <p className="text-gray-400">• Take 2 same (need 4+ supply)</p>
+        <p className="text-gray-400">• Take 3 different colors</p>
         {selectedTokens.length > 0 && !isValid && (
-          <p className="text-yellow-400">
+          <p className="text-yellow-300 mt-2 font-medium flex items-center gap-1">
+            <span>⚠️</span>
             {getValidationError()}
           </p>
         )}
