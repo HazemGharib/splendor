@@ -1,13 +1,25 @@
 import { useState } from 'react';
 import { Button } from '../design-system/Button';
+import { useSplendorTitleDebugTap } from '../../hooks/useDebugEasterEgg';
+import { PlayerColor } from '../../models/Player';
+import { cn } from '../../utils/cn';
 
 interface GameSetupProps {
-  onStart: (playerCount: 2 | 3 | 4, aiCount: number) => void;
+  onStart: (playerCount: 2 | 3 | 4, aiCount: number, yourColor: PlayerColor) => void;
 }
+
+const colorChoice: { value: PlayerColor; label: string; swatch: string }[] = [
+  { value: PlayerColor.RED, label: 'Red', swatch: 'bg-red-500 ring-red-400' },
+  { value: PlayerColor.BLUE, label: 'Blue', swatch: 'bg-blue-500 ring-blue-400' },
+  { value: PlayerColor.GREEN, label: 'Green', swatch: 'bg-green-500 ring-green-400' },
+  { value: PlayerColor.YELLOW, label: 'Yellow', swatch: 'bg-yellow-400 ring-yellow-300' },
+];
 
 export function GameSetup({ onStart }: GameSetupProps) {
   const [selectedCount, setSelectedCount] = useState<2 | 3 | 4>(2);
   const [playAgainstAI, setPlayAgainstAI] = useState(true);
+  const [yourColor, setYourColor] = useState<PlayerColor>(PlayerColor.RED);
+  const onSplendorTitleDebugTap = useSplendorTitleDebugTap();
 
   return (
     <div className="min-h-screen bg-gray-950">
@@ -31,7 +43,11 @@ export function GameSetup({ onStart }: GameSetupProps) {
             <div className="bg-gray-300/20 backdrop-blur-2xl p-6 sm:p-8 rounded-xl shadow-2xl border border-white/10">
               {/* Title section inside card */}
               <div className="text-center mb-6">
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-2" style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }}>
+                <h1
+                  className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-2 select-none"
+                  style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }}
+                  onClick={onSplendorTitleDebugTap}
+                >
                   Splendor
                 </h1>
                 <p className="text-gray-300 text-sm sm:text-base">
@@ -60,6 +76,39 @@ export function GameSetup({ onStart }: GameSetupProps) {
                         )}
                       >
                         {count}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-3">
+                    Your color
+                  </label>
+                  <p className="text-xs text-gray-400 mb-3">
+                    Your panel uses this color. Other seats use the remaining colors.
+                  </p>
+                  <div className="grid grid-cols-4 gap-2 sm:gap-3">
+                    {colorChoice.map(({ value, label, swatch }) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setYourColor(value)}
+                        className={cn(
+                          'flex flex-col items-center gap-2 rounded-xl py-3 px-2 border transition-all touch-manipulation min-h-[72px]',
+                          yourColor === value
+                            ? 'border-white/60 bg-white/15 ring-2 ring-white/40'
+                            : 'border-white/10 bg-white/5 hover:bg-white/10'
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            'h-8 w-8 rounded-full ring-2 ring-offset-2 ring-offset-gray-900/80',
+                            swatch
+                          )}
+                          aria-hidden
+                        />
+                        <span className="text-[11px] font-medium text-gray-200 capitalize">{label}</span>
                       </button>
                     ))}
                   </div>
@@ -97,7 +146,9 @@ export function GameSetup({ onStart }: GameSetupProps) {
                 </div>
                 
                 <Button
-                  onClick={() => onStart(selectedCount, playAgainstAI ? selectedCount - 1 : 0)}
+                  onClick={() =>
+                    onStart(selectedCount, playAgainstAI ? selectedCount - 1 : 0, yourColor)
+                  }
                   className="w-full shadow-lg"
                   size="lg"
                 >
@@ -110,8 +161,4 @@ export function GameSetup({ onStart }: GameSetupProps) {
       </div>
     </div>
   );
-}
-
-function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(' ');
 }

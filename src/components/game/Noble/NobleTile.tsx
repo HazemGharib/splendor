@@ -17,7 +17,7 @@ export function NobleTile({ noble, onClick, disabled }: NobleTileProps) {
       className={cn(
         'w-40 h-56 bg-purple-900 border-4 border-purple-700 rounded-lg overflow-hidden',
         'flex flex-col transition-all duration-200 relative touch-manipulation',
-        onClick && !disabled && 'hover:scale-105 active:scale-100 cursor-pointer',
+        onClick && !disabled && 'hover:scale-95 active:scale-100 cursor-pointer',
         disabled && 'opacity-50 cursor-not-allowed'
       )}
       onClick={!disabled ? onClick : undefined}

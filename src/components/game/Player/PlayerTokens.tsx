@@ -17,9 +17,11 @@ const gemOrder: GemColor[] = [
 
 export function PlayerTokens({ tokens }: PlayerTokensProps) {
   return (
-    <div className="flex gap-1 sm:gap-2 flex-wrap">
+    <div className="grid w-full max-w-[280px] sm:max-w-[320px] grid-cols-3 sm:grid-cols-6 gap-2 justify-items-center">
       {gemOrder.map((color) => (
-        <GemToken key={color} color={color} count={tokens[color]} size="sm" />
+        <div key={color} className="flex w-full min-w-0 justify-center">
+          <GemToken color={color} count={tokens[color]} size="sm" />
+        </div>
       ))}
     </div>
   );

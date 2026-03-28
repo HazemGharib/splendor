@@ -1,15 +1,26 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { GameState, GamePhase } from '../models/GameState';
-import { PlayerColor } from '../models/Player';
+import { PlayerColor, assignPlayerColors } from '../models/Player';
 import { DataLoader } from '../services/DataLoader';
 import { shuffle } from '../utils/shuffle';
 import { GAME_CONSTANTS } from '../utils/constants';
 import { DevelopmentCard, GemColor } from '../models/Card';
+import { Noble } from '../models/Noble';
 import { RuleEngine } from '../services/RuleEngine';
 
 export interface GameStore extends GameState {
-  initGame: (playerCount: 2 | 3 | 4, aiCount?: number) => void;
+  debugMode: boolean;
+  toggleDebugMode: () => void;
+  debugAddCard: (card: DevelopmentCard) => void;
+  debugRemoveCard: (cardId: string) => void;
+  debugAddToken: (color: GemColor, amount: number) => void;
+  debugRemoveToken: (color: GemColor, amount: number) => void;
+  debugAddNoble: (nobleId: string) => void;
+  debugRemoveNoble: (nobleId: string) => void;
+  debugReplaceBoardNoble: (boardNobleId: string, replacement: Noble) => void;
+  debugSetMarketCard: (level: 1 | 2 | 3, index: number, card: DevelopmentCard) => void;
+  initGame: (playerCount: 2 | 3 | 4, aiCount?: number, humanColor?: PlayerColor) => void;
   takeThreeTokens: (colors: GemColor[]) => void;
   takeTwoTokens: (color: GemColor) => void;
   purchaseCard: (cardId: string, fromReserved?: boolean) => void;
@@ -50,8 +61,117 @@ export const useGameStore = create<GameStore>()(
     winner: null,
     turnCount: 0,
     hasPerformedAction: false,
+    debugMode: false,
 
-    initGame: (playerCount, aiCount = 0) =>
+    toggleDebugMode: () =>
+      set((state) => {
+        state.debugMode = !state.debugMode;
+      }),
+
+    debugAddCard: (card) =>
+      set((state) => {
+        if (!state.debugMode) return;
+        const currentPlayer = state.players[state.currentPlayerIndex];
+        currentPlayer.cards.push(card);
+        currentPlayer.bonuses[card.bonus] += 1;
+        currentPlayer.prestige += card.prestige;
+      }),
+
+    debugRemoveCard: (cardId) =>
+      set((state) => {
+        if (!state.debugMode) return;
+        const currentPlayer = state.players[state.currentPlayerIndex];
+        const cardIndex = currentPlayer.cards.findIndex((c) => c.id === cardId);
+        if (cardIndex >= 0) {
+          const card = currentPlayer.cards[cardIndex];
+          currentPlayer.cards.splice(cardIndex, 1);
+          currentPlayer.bonuses[card.bonus] = Math.max(0, currentPlayer.bonuses[card.bonus] - 1);
+          currentPlayer.prestige = Math.max(0, currentPlayer.prestige - card.prestige);
+        }
+      }),
+
+    debugAddToken: (color, amount) =>
+      set((state) => {
+        if (!state.debugMode) return;
+        const currentPlayer = state.players[state.currentPlayerIndex];
+        const totalHeld = RuleEngine.getTotalTokenCount(currentPlayer.tokens);
+        const roomForPlayer = Math.max(0, GAME_CONSTANTS.PLAYER.MAX_TOKENS - totalHeld);
+        const fromBank = Math.min(amount, state.tokenSupply[color], roomForPlayer);
+        if (fromBank <= 0) return;
+        currentPlayer.tokens[color] += fromBank;
+        state.tokenSupply[color] -= fromBank;
+      }),
+
+    debugRemoveToken: (color, amount) =>
+      set((state) => {
+        if (!state.debugMode) return;
+        const currentPlayer = state.players[state.currentPlayerIndex];
+        const removeCount = Math.min(amount, currentPlayer.tokens[color]);
+        if (removeCount <= 0) return;
+        currentPlayer.tokens[color] -= removeCount;
+        state.tokenSupply[color] = Math.min(
+          state.tokenSupply[color] + removeCount,
+          state.maxTokenSupply[color]
+        );
+      }),
+
+    debugAddNoble: (nobleId) =>
+      set((state) => {
+        if (!state.debugMode) return;
+        const currentPlayer = state.players[state.currentPlayerIndex];
+        if (currentPlayer.nobles.some((n) => n.id === nobleId)) return;
+
+        const nobleIndex = state.nobles.findIndex((n) => n.id === nobleId);
+        if (nobleIndex >= 0) {
+          const noble = state.nobles[nobleIndex];
+          currentPlayer.nobles.push(noble);
+          currentPlayer.prestige += noble.prestige;
+          state.nobles.splice(nobleIndex, 1);
+        }
+      }),
+
+    debugRemoveNoble: (nobleId) =>
+      set((state) => {
+        if (!state.debugMode) return;
+        const currentPlayer = state.players[state.currentPlayerIndex];
+        const idx = currentPlayer.nobles.findIndex((n) => n.id === nobleId);
+        if (idx < 0) return;
+
+        const noble = currentPlayer.nobles[idx];
+        currentPlayer.nobles.splice(idx, 1);
+        currentPlayer.prestige = Math.max(0, currentPlayer.prestige - noble.prestige);
+
+        if (!state.nobles.some((n) => n.id === nobleId)) {
+          state.nobles.push(noble);
+        }
+      }),
+
+    debugReplaceBoardNoble: (boardNobleId, replacement) =>
+      set((state) => {
+        if (!state.debugMode) return;
+        const idx = state.nobles.findIndex((n) => n.id === boardNobleId);
+        if (idx < 0) return;
+        if (replacement.id === boardNobleId) return;
+
+        const isInPlay = (id: string) =>
+          state.nobles.some((n) => n.id === id) ||
+          state.players.some((p) => p.nobles.some((n) => n.id === id));
+
+        if (isInPlay(replacement.id)) return;
+
+        state.nobles[idx] = { ...replacement };
+      }),
+
+    debugSetMarketCard: (level, index, card) =>
+      set((state) => {
+        if (!state.debugMode) return;
+        const levelKey = `level${level}` as 'level1' | 'level2' | 'level3';
+        if (index >= 0 && index < state.cardMarket[levelKey].visible.length) {
+          state.cardMarket[levelKey].visible[index] = card;
+        }
+      }),
+
+    initGame: (playerCount, aiCount = 0, humanColor = PlayerColor.RED) =>
       set((state) => {
         const gemTokenCount =
           playerCount === 2
@@ -67,7 +187,7 @@ export const useGameStore = create<GameStore>()(
             ? GAME_CONSTANTS.NOBLES.COUNT_3P
             : GAME_CONSTANTS.NOBLES.COUNT_4P;
 
-        const playerColors = [PlayerColor.RED, PlayerColor.BLUE, PlayerColor.GREEN, PlayerColor.YELLOW];
+        const playerColors = assignPlayerColors(playerCount, humanColor);
         state.players = Array.from({ length: playerCount }, (_, i) => ({
           id: `p${i + 1}`,
           color: playerColors[i],

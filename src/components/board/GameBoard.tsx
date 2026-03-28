@@ -10,8 +10,10 @@ import { SettingsModal } from '../ui/SettingsModal';
 import { HelpModal } from '../ui/HelpModal';
 import { TurnIndicator } from '../ui/TurnIndicator';
 import { TokenSelector } from '../ui/TokenSelector';
+import { DebugPanel } from '../debug/DebugPanel';
 import { GemColor } from '../../models/Card';
 import { AIService } from '../../services/AIService';
+import { useSplendorTitleDebugTap } from '../../hooks/useDebugEasterEgg';
 
 export function GameBoard() {
   const state = useGameStore();
@@ -37,6 +39,7 @@ export function GameBoard() {
   const [isAIThinking, setIsAIThinking] = useState(false);
   const aiTurnInProgressRef = useRef(false);
   const currentPlayer = players[currentPlayerIndex];
+  const onSplendorTitleDebugTap = useSplendorTitleDebugTap();
 
   // AI turn logic - runs when it's an AI player's turn
   useEffect(() => {
@@ -154,16 +157,22 @@ export function GameBoard() {
       <div className="max-w-[2000px] mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-3 sm:mb-4">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Splendor</h1>
+          <h1
+            className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white select-none"
+            style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }}
+            onClick={onSplendorTitleDebugTap}
+          >
+            Splendor
+          </h1>
           <div className="flex gap-2">
             <HelpModal />
             <SettingsModal />
           </div>
         </div>
         
-        {/* Turn Indicator */}
+        {/* Turn Indicator — hidden on small screens (current player still highlighted in player panels) */}
         {currentPlayer && (
-          <div className="mb-3">
+          <div className="mb-3 hidden sm:block">
             <TurnIndicator
               currentPlayer={currentPlayer}
               hasPerformedAction={hasPerformedAction}
@@ -215,6 +224,7 @@ export function GameBoard() {
       </div>
       
       {winner && <WinnerModal winner={winner} />}
+      <DebugPanel />
     </div>
   );
 }

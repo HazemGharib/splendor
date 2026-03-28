@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { GemColor } from '../../models/Card';
 import { TokenSupply } from '../../models/GameState';
 import { TokenInventory } from '../../models/Player';
@@ -23,8 +23,16 @@ const gemOrder: GemColor[] = [
   GemColor.GOLD,
 ];
 
+const TOKEN_COLLECT_MS = 400;
+
+function prefersReducedMotion(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
 export function TokenSelector({ supply, playerTokens, onTakeTokens, disabled }: TokenSelectorProps) {
   const [selectedTokens, setSelectedTokens] = useState<GemColor[]>([]);
+  const [collectingColors, setCollectingColors] = useState<GemColor[]>([]);
   
   const totalPlayerTokens = RuleEngine.getTotalTokenCount(playerTokens);
   const hasMaxTokens = totalPlayerTokens >= 10;
@@ -61,14 +69,32 @@ export function TokenSelector({ supply, playerTokens, onTakeTokens, disabled }: 
     return totalPlayerTokens + 3 <= 10;
   };
 
+  const finishCollect = useCallback(
+    (colors: GemColor[], isTwoSame: boolean) => {
+      onTakeTokens(colors, isTwoSame);
+      setSelectedTokens([]);
+      setCollectingColors([]);
+    },
+    [onTakeTokens]
+  );
+
   const handleConfirm = () => {
-    if (canTakeTwoSame()) {
-      onTakeTokens(selectedTokens, true);
-      setSelectedTokens([]);
-    } else if (canTakeThreeDifferent()) {
-      onTakeTokens(selectedTokens, false);
-      setSelectedTokens([]);
+    const two = canTakeTwoSame();
+    const three = canTakeThreeDifferent();
+    if (!two && !three) return;
+
+    const snapshot = [...selectedTokens];
+    const colorsToPulse = two ? [snapshot[0]] : snapshot;
+
+    if (prefersReducedMotion()) {
+      finishCollect(snapshot, two);
+      return;
     }
+
+    setCollectingColors(colorsToPulse);
+    window.setTimeout(() => {
+      finishCollect(snapshot, two);
+    }, TOKEN_COLLECT_MS);
   };
 
   const handleClear = () => {
@@ -76,6 +102,7 @@ export function TokenSelector({ supply, playerTokens, onTakeTokens, disabled }: 
   };
 
   const isValid = canTakeTwoSame() || canTakeThreeDifferent();
+  const isCollecting = collectingColors.length > 0;
   
   // Calculate validation error for better feedback
   const getValidationError = (): string | null => {
@@ -134,12 +161,14 @@ export function TokenSelector({ supply, playerTokens, onTakeTokens, disabled }: 
             <div
               key={color}
               className={cn(
-                'relative transition-all duration-300 flex justify-center p-2 rounded-xl',
-                isSelected && 'bg-yellow-500/20 ring-4 ring-yellow-400/80 scale-105 shadow-lg shadow-yellow-500/30',
-                !isSelected && !effectivelyDisabled && !isGold && 'hover:bg-gray-700/30',
+                'relative flex justify-center p-2 rounded-xl',
+                !collectingColors.includes(color) && 'transition-all duration-300',
+                collectingColors.includes(color) && 'token-collect z-10',
+                isSelected && !collectingColors.includes(color) && 'bg-yellow-500/20 ring-4 ring-yellow-400/80 scale-105 shadow-lg shadow-yellow-500/30',
+                !isSelected && !effectivelyDisabled && !isGold && !isCollecting && 'hover:bg-gray-700/30',
                 effectivelyDisabled || isGold ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
               )}
-              onClick={() => handleTokenClick(color)}
+              onClick={() => !isCollecting && handleTokenClick(color)}
               title={isGold ? 'Gold tokens can only be obtained by reserving cards' : undefined}
             >
               <GemToken color={color} count={count} size="sm" />
@@ -157,7 +186,7 @@ export function TokenSelector({ supply, playerTokens, onTakeTokens, disabled }: 
         <Button 
           onClick={handleClear} 
           variant="secondary" 
-          disabled={effectivelyDisabled || selectedTokens.length === 0} 
+          disabled={effectivelyDisabled || selectedTokens.length === 0 || isCollecting} 
           className="flex-1 font-semibold" 
           size="sm"
         >
@@ -166,7 +195,7 @@ export function TokenSelector({ supply, playerTokens, onTakeTokens, disabled }: 
         <Button 
           onClick={handleConfirm} 
           variant="default" 
-          disabled={effectivelyDisabled || !isValid} 
+          disabled={effectivelyDisabled || !isValid || isCollecting} 
           className="flex-1 font-semibold bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800" 
           size="sm"
         >
