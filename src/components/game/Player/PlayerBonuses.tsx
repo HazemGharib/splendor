@@ -20,7 +20,7 @@ export function PlayerBonuses({ bonuses }: PlayerBonusesProps) {
       {bonusEntries.map(({ color, count }) => (
         <div key={color} className="flex items-center gap-1">
           <CardBonus bonus={color} size="sm" />
-          <span className="text-sm font-semibold">{count}</span>
+          <span className="text-sm font-semibold text-white">{count}</span>
         </div>
       ))}
     </div>
