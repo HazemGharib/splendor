@@ -21,7 +21,7 @@ export function CardBonus({ bonus, size = 'md' }: CardBonusProps) {
   const sizeClass = size === 'lg' ? `gem-${bonus}-lg` : size === 'sm' ? `gem-${bonus}-sm` : '';
   
   return (
-    <div className="absolute top-2 left-2">
+    <div className="relative inline-block">
       <div
         className={cn('gem-bonus', gemClass, sizeClass)}
         title={`${bonus} bonus`}

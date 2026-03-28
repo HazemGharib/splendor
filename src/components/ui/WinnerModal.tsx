@@ -22,10 +22,10 @@ export function WinnerModal({ winner }: WinnerModalProps) {
     <Modal open={true}>
       <ModalContent>
         <ModalHeader>
-          <ModalTitle className="text-2xl text-center">
+          <ModalTitle className="text-2xl text-white text-center">
             Game Over!
           </ModalTitle>
-          <ModalDescription className="text-center text-lg mt-2">
+          <ModalDescription className="text-center text-lg mt-2 text-white">
             <span className="capitalize font-bold text-white">{winner.color}</span> Player Wins!
           </ModalDescription>
         </ModalHeader>
