@@ -9,7 +9,16 @@ import { DevelopmentCard, GemColor } from '../models/Card';
 import { Noble } from '../models/Noble';
 import { RuleEngine } from '../services/RuleEngine';
 
+export interface NobleVisitAnnouncementPayload {
+  noble: Noble;
+  playerColor: PlayerColor;
+  isAI: boolean;
+  at: number;
+}
+
 export interface GameStore extends GameState {
+  nobleVisitAnnouncement: NobleVisitAnnouncementPayload | null;
+  dismissNobleVisitAnnouncement: () => void;
   debugMode: boolean;
   toggleDebugMode: () => void;
   debugAddCard: (card: DevelopmentCard) => void;
@@ -66,6 +75,12 @@ export const useGameStore = create<GameStore>()(
     turnCount: 0,
     hasPerformedAction: false,
     debugMode: false,
+    nobleVisitAnnouncement: null,
+
+    dismissNobleVisitAnnouncement: () =>
+      set((state) => {
+        state.nobleVisitAnnouncement = null;
+      }),
 
     toggleDebugMode: () =>
       set((state) => {
@@ -271,6 +286,7 @@ export const useGameStore = create<GameStore>()(
         state.winner = null;
         state.turnCount = 0;
         state.hasPerformedAction = false;
+        state.nobleVisitAnnouncement = null;
       }),
 
     takeThreeTokens: (colors) =>
@@ -459,16 +475,27 @@ export const useGameStore = create<GameStore>()(
           const nobleToAward = eligibleNobles[0];
           currentPlayer.nobles.push(nobleToAward);
           currentPlayer.prestige += nobleToAward.prestige;
-          
+
           const nobleIndex = state.nobles.findIndex((n) => n.id === nobleToAward.id);
           if (nobleIndex >= 0) {
             state.nobles.splice(nobleIndex, 1);
           }
+
+          state.nobleVisitAnnouncement = {
+            noble: {
+              ...nobleToAward,
+              requirements: { ...nobleToAward.requirements },
+            },
+            playerColor: currentPlayer.color,
+            isAI: currentPlayer.isAI,
+            at: Date.now(),
+          };
         }
 
         if (currentPlayer.prestige >= GAME_CONSTANTS.VICTORY.PRESTIGE_TARGET) {
           state.phase = GamePhase.GAME_OVER;
           state.winner = currentPlayer;
+          state.nobleVisitAnnouncement = null;
           return;
         }
 
@@ -484,12 +511,18 @@ export const useGameStore = create<GameStore>()(
       set((state) => {
         const currentPlayer = state.players[state.currentPlayerIndex];
         const nobleIndex = state.nobles.findIndex((n) => n.id === nobleId);
-        
+
         if (nobleIndex >= 0) {
           const noble = state.nobles[nobleIndex];
           currentPlayer.nobles.push(noble);
           currentPlayer.prestige += noble.prestige;
           state.nobles.splice(nobleIndex, 1);
+          state.nobleVisitAnnouncement = {
+            noble: { ...noble, requirements: { ...noble.requirements } },
+            playerColor: currentPlayer.color,
+            isAI: currentPlayer.isAI,
+            at: Date.now(),
+          };
         }
       }),
   }))
