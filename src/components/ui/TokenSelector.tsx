@@ -134,9 +134,9 @@ export function TokenSelector({ supply, playerTokens, onTakeTokens, disabled }: 
     <div className="bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 p-4 sm:p-5 rounded-2xl h-fit border border-gray-700/50 shadow-xl">
       <h3 className="text-base sm:text-lg font-bold mb-4 text-white flex items-center gap-2">
         <span className="text-2xl">💎</span>
-        Take Tokens
+        Take Gems
       </h3>
-      
+
       {hasMaxTokens && (
         <div className="mb-4 p-3 bg-red-950/40 backdrop-blur-sm border border-red-500/30 rounded-lg text-xs text-red-300 flex items-center gap-2">
           <span className="text-lg">⚠️</span>
