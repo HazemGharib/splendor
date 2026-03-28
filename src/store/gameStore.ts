@@ -9,7 +9,7 @@ import { DevelopmentCard, GemColor } from '../models/Card';
 import { RuleEngine } from '../services/RuleEngine';
 
 export interface GameStore extends GameState {
-  initGame: (playerCount: 2 | 3 | 4) => void;
+  initGame: (playerCount: 2 | 3 | 4, aiCount?: number) => void;
   takeThreeTokens: (colors: GemColor[]) => void;
   takeTwoTokens: (color: GemColor) => void;
   purchaseCard: (cardId: string, fromReserved?: boolean) => void;
@@ -51,7 +51,7 @@ export const useGameStore = create<GameStore>()(
     turnCount: 0,
     hasPerformedAction: false,
 
-    initGame: (playerCount) =>
+    initGame: (playerCount, aiCount = 0) =>
       set((state) => {
         const gemTokenCount =
           playerCount === 2
@@ -71,6 +71,7 @@ export const useGameStore = create<GameStore>()(
         state.players = Array.from({ length: playerCount }, (_, i) => ({
           id: `p${i + 1}`,
           color: playerColors[i],
+          isAI: i >= (playerCount - aiCount), // First player(s) are human, rest are AI
           tokens: {
             emerald: 0,
             diamond: 0,
@@ -145,6 +146,11 @@ export const useGameStore = create<GameStore>()(
         if (state.hasPerformedAction) return;
         
         const currentPlayer = state.players[state.currentPlayerIndex];
+        const totalTokens = RuleEngine.getTotalTokenCount(currentPlayer.tokens);
+        
+        // Validate before taking tokens
+        if (totalTokens + 3 > GAME_CONSTANTS.PLAYER.MAX_TOKENS) return;
+        
         colors.forEach((color) => {
           if (color !== GemColor.GOLD && state.tokenSupply[color] > 0) {
             currentPlayer.tokens[color] += 1;
@@ -158,8 +164,13 @@ export const useGameStore = create<GameStore>()(
       set((state) => {
         if (state.hasPerformedAction) return;
         
+        const currentPlayer = state.players[state.currentPlayerIndex];
+        const totalTokens = RuleEngine.getTotalTokenCount(currentPlayer.tokens);
+        
+        // Validate before taking tokens
+        if (totalTokens + 2 > GAME_CONSTANTS.PLAYER.MAX_TOKENS) return;
+        
         if (color !== GemColor.GOLD && state.tokenSupply[color] >= 4) {
-          const currentPlayer = state.players[state.currentPlayerIndex];
           currentPlayer.tokens[color] += 2;
           state.tokenSupply[color] -= 2;
           state.hasPerformedAction = true;
@@ -257,6 +268,14 @@ export const useGameStore = create<GameStore>()(
         if (currentPlayer.reservedCards.length >= GAME_CONSTANTS.PLAYER.MAX_RESERVED_CARDS) {
           return;
         }
+        
+        // Check if reserving would exceed 10 tokens (since we get a gold token)
+        const totalTokens = RuleEngine.getTotalTokenCount(currentPlayer.tokens);
+        const willGetGoldToken = state.tokenSupply.gold > 0 && currentPlayer.tokens.gold < GAME_CONSTANTS.TOKENS.GOLD_TOKENS;
+        
+        if (willGetGoldToken && totalTokens + 1 > GAME_CONSTANTS.PLAYER.MAX_TOKENS) {
+          return;
+        }
 
         let card: DevelopmentCard | undefined;
 
@@ -279,7 +298,7 @@ export const useGameStore = create<GameStore>()(
         if (card) {
           currentPlayer.reservedCards.push(card);
           
-          if (state.tokenSupply.gold > 0 && currentPlayer.tokens.gold < GAME_CONSTANTS.TOKENS.GOLD_TOKENS) {
+          if (willGetGoldToken) {
             currentPlayer.tokens.gold += 1;
             state.tokenSupply.gold -= 1;
           }

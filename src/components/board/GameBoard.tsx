@@ -1,3 +1,4 @@
+import { useEffect, useState, useRef } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { GamePhase } from '../../models/GameState';
 import { CardMarket } from './CardMarket';
@@ -10,6 +11,7 @@ import { HelpModal } from '../ui/HelpModal';
 import { TurnIndicator } from '../ui/TurnIndicator';
 import { TokenSelector } from '../ui/TokenSelector';
 import { GemColor } from '../../models/Card';
+import { AIService } from '../../services/AIService';
 
 export function GameBoard() {
   const state = useGameStore();
@@ -32,7 +34,78 @@ export function GameBoard() {
     endTurn 
   } = useGameStore();
 
+  const [isAIThinking, setIsAIThinking] = useState(false);
+  const aiTurnInProgressRef = useRef(false);
   const currentPlayer = players[currentPlayerIndex];
+
+  // AI turn logic - runs when it's an AI player's turn
+  useEffect(() => {
+    const shouldTriggerAI = 
+      phase === GamePhase.PLAYING &&
+      currentPlayer?.isAI &&
+      !hasPerformedAction &&
+      !aiTurnInProgressRef.current;
+    
+    if (!shouldTriggerAI) {
+      // Reset when not AI turn (using microtask to avoid synchronous setState)
+      if (aiTurnInProgressRef.current && !currentPlayer?.isAI) {
+        aiTurnInProgressRef.current = false;
+        Promise.resolve().then(() => {
+          setIsAIThinking(false);
+        });
+      }
+      return;
+    }
+
+    aiTurnInProgressRef.current = true;
+    
+    // Use a microtask to avoid synchronous setState in effect
+    Promise.resolve().then(() => {
+      setIsAIThinking(true);
+    });
+    
+    // Simulate AI thinking time (2-3 seconds)
+    const thinkingTime = 2000 + Math.random() * 1000;
+    
+    const timeoutId = setTimeout(async () => {
+      const move = await AIService.makeMove(state);
+      
+      if (move) {
+        switch (move.type) {
+          case 'TAKE_TWO':
+            if (move.colors && move.colors[0]) {
+              takeTwoTokens(move.colors[0]);
+            }
+            break;
+          case 'TAKE_THREE':
+            if (move.colors) {
+              takeThreeTokens(move.colors);
+            }
+            break;
+          case 'PURCHASE':
+            if (move.cardId) {
+              purchaseCard(move.cardId, move.isReserved);
+            }
+            break;
+          case 'RESERVE':
+            if (move.cardId) {
+              reserveCard(move.cardId);
+            }
+            break;
+        }
+      }
+      
+      setIsAIThinking(false);
+      aiTurnInProgressRef.current = false;
+      
+      // Auto-end turn after a short delay
+      setTimeout(() => {
+        endTurn();
+      }, 500);
+    }, thinkingTime);
+    
+    return () => clearTimeout(timeoutId);
+  }, [phase, currentPlayer, hasPerformedAction, state, takeThreeTokens, takeTwoTokens, purchaseCard, reserveCard, endTurn]);
 
   const handleTakeTokens = (colors: GemColor[], isTwoSame: boolean) => {
     if (isTwoSame) {
@@ -40,15 +113,41 @@ export function GameBoard() {
     } else {
       takeThreeTokens(colors);
     }
+    // Auto-end turn after action
+    setTimeout(() => {
+      endTurn();
+    }, 500);
+  };
+
+  const handlePurchaseCard = (cardId: string, fromReserved?: boolean) => {
+    purchaseCard(cardId, fromReserved);
+    // Auto-end turn after action
+    setTimeout(() => {
+      endTurn();
+    }, 500);
   };
 
   const handlePurchaseReserved = (cardId: string) => {
     purchaseCard(cardId, true);
+    // Auto-end turn after action
+    setTimeout(() => {
+      endTurn();
+    }, 500);
+  };
+
+  const handleReserveCard = (cardId: string) => {
+    reserveCard(cardId);
+    // Auto-end turn after action
+    setTimeout(() => {
+      endTurn();
+    }, 500);
   };
 
   if (phase === GamePhase.SETUP) {
     return <GameSetup onStart={initGame} />;
   }
+
+  const isCurrentPlayerAI = currentPlayer?.isAI || false;
 
   return (
     <div className="min-h-screen bg-gray-950 p-2 sm:p-4 lg:p-6">
@@ -68,14 +167,14 @@ export function GameBoard() {
             <TurnIndicator
               currentPlayer={currentPlayer}
               hasPerformedAction={hasPerformedAction}
-              onEndTurn={endTurn}
+              isAIThinking={isAIThinking}
             />
           </div>
         )}
         
         {/* Nobles - Full width row */}
         <div className="mb-3">
-          <NobleMarket nobles={nobles} disabled={phase === GamePhase.GAME_OVER} />
+          <NobleMarket nobles={nobles} disabled={phase === GamePhase.GAME_OVER || isCurrentPlayerAI} />
         </div>
         
         {/* Main game area - Two columns on desktop */}
@@ -83,20 +182,24 @@ export function GameBoard() {
           {/* Left column: Card Market */}
           <CardMarket
             market={cardMarket}
-            onCardClick={purchaseCard}
-            onReserve={reserveCard}
+            onCardClick={handlePurchaseCard}
+            onReserve={handleReserveCard}
             playerTokens={currentPlayer?.tokens}
             playerBonuses={currentPlayer?.bonuses}
-            disabled={phase === GamePhase.GAME_OVER || hasPerformedAction}
+            tokenSupply={tokenSupply}
+            disabled={phase === GamePhase.GAME_OVER || hasPerformedAction || isCurrentPlayerAI}
           />
           
           {/* Right column: Token Selector + All Players */}
           <div className="space-y-3">
-            <TokenSelector
-              supply={tokenSupply}
-              onTakeTokens={handleTakeTokens}
-              disabled={phase === GamePhase.GAME_OVER || hasPerformedAction}
-            />
+            {!isCurrentPlayerAI && (
+              <TokenSelector
+                supply={tokenSupply}
+                playerTokens={currentPlayer?.tokens || { emerald: 0, diamond: 0, sapphire: 0, onyx: 0, ruby: 0, gold: 0 }}
+                onTakeTokens={handleTakeTokens}
+                disabled={phase === GamePhase.GAME_OVER || hasPerformedAction}
+              />
+            )}
             
             {players.map((player, index) => (
               <PlayerArea

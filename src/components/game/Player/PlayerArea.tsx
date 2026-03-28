@@ -31,9 +31,14 @@ export function PlayerArea({ player, isCurrentPlayer, onPurchaseReserved, hasPer
     >
       <div className="flex justify-between items-start mb-2 sm:mb-3">
         <div>
-          <h3 className="text-white text-base sm:text-lg font-semibold capitalize">
-            {player.color} Player
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-white text-base sm:text-lg font-semibold capitalize">
+              {player.color} {player.isAI ? 'AI' : 'Player'}
+            </h3>
+            {player.isAI && (
+              <span className="text-xs px-2 py-0.5 bg-purple-600 text-white rounded">AI</span>
+            )}
+          </div>
           {isCurrentPlayer && (
             <span className="text-xs text-yellow-400">Current Turn</span>
           )}
@@ -57,7 +62,7 @@ export function PlayerArea({ player, isCurrentPlayer, onPurchaseReserved, hasPer
           <PlayerCards cards={player.cards} />
         </div>
         
-        {isCurrentPlayer && (
+        {isCurrentPlayer && !player.isAI && (
           <ReservedCards
             cards={player.reservedCards}
             playerTokens={player.tokens}
@@ -65,6 +70,13 @@ export function PlayerArea({ player, isCurrentPlayer, onPurchaseReserved, hasPer
             onPurchase={onPurchaseReserved}
             disabled={hasPerformedAction}
           />
+        )}
+        
+        {player.isAI && player.reservedCards.length > 0 && (
+          <div>
+            <div className="text-xs text-gray-400 mb-1">Reserved ({player.reservedCards.length})</div>
+            <div className="text-xs text-gray-500">Hidden</div>
+          </div>
         )}
         
         {player.nobles.length > 0 && (
