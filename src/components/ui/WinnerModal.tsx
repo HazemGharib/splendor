@@ -4,7 +4,6 @@ import {
   ModalContent,
   ModalHeader,
   ModalTitle,
-  ModalDescription,
   ModalFooter,
 } from '../design-system/Modal';
 import { Button } from '../design-system/Button';
@@ -20,24 +19,22 @@ export function WinnerModal({ winner }: WinnerModalProps) {
 
   return (
     <Modal open={true}>
-      <ModalContent>
+      <ModalContent className="lg:max-w-2xl max-w-sm max-h-max overflow-y-auto rounded-xl">
         <ModalHeader>
-          <ModalTitle className="text-2xl text-white text-center">
-            Game Over!
+          <ModalTitle className="text-5xl text-white text-center" style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }}>
+            <span className="capitalize font-bold text-white">{winner.color}</span> Player Wins
           </ModalTitle>
-          <ModalDescription className="text-center text-lg mt-2 text-white">
-            <span className="capitalize font-bold text-white">{winner.color}</span> Player Wins!
-          </ModalDescription>
         </ModalHeader>
         
         <div className="py-4 space-y-2 text-center">
-          <div className="text-3xl font-bold text-yellow-400">{winner.prestige} Prestige</div>
-          <div className="text-sm text-gray-400">{winner.cards.length} Cards Acquired</div>
-          <div className="text-sm text-gray-400">{winner.nobles.length} Nobles Visited</div>
+          <div className="text-3xl font-bold text-white" style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }}>With</div>
+          <div className="text-3xl font-bold bg-gradient-to-r from-yellow-200 to-amber-500 text-transparent bg-clip-text" style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }}>{winner.prestige} Prestige Points</div>
+          <div className="text-lg bg-gradient-to-r from-yellow-200 to-amber-500 text-transparent bg-clip-text" style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }}>{winner.cards.length} Cards Acquired</div>
+          <div className="text-lg bg-gradient-to-r from-yellow-200 to-amber-500 text-transparent bg-clip-text" style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }}>{winner.nobles.length} Nobles Visited</div>
         </div>
         
         <ModalFooter>
-          <Button onClick={handleRestart} className="w-full" size="lg">
+          <Button onClick={handleRestart} className="w-full text-2xl" style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }} size="lg">
             Play Again
           </Button>
         </ModalFooter>
