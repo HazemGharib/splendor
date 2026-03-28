@@ -174,7 +174,9 @@ export function TokenSelector({ supply, playerTokens, onTakeTokens, disabled }: 
               <GemToken color={color} count={count} size="sm" />
               {isSelected && (
                 <div className="absolute -top-1 -right-1 w-7 h-7 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full flex items-center justify-center text-gray-900 font-bold text-sm z-10 shadow-lg animate-pulse">
-                  {selectedTokens.filter((c) => c === color).length}
+                  {selectedTokens.length === 1
+                    ? 2
+                    : selectedTokens.filter((c) => c === color).length}
                 </div>
               )}
             </div>
