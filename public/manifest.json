@@ -1,12 +1,20 @@
 {
-  "name": "Splendor",
+  "id": "splendor-renaissance-card-game",
+  "name": "Splendor - Renaissance Card Game",
   "short_name": "Splendor",
-  "description": "Play the classic Splendor board game in your browser",
+  "description": "Build your gem empire in this classic Renaissance-themed strategy card game",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1a1a1a",
-  "theme_color": "#1a1a1a",
+  "background_color": "#0a0a0f",
+  "theme_color": "#0a0a0f",
+  "orientation": "any",
   "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "64x64",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
@@ -16,6 +24,20 @@
       "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/screenshot-desktop.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/assets/screenshot-mobile.png",
+      "sizes": "458x717",
+      "type": "image/png",
+      "form_factor": "narrow"
     }
   ]
 }

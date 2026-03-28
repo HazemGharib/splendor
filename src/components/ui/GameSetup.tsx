@@ -31,7 +31,7 @@ export function GameSetup({ onStart }: GameSetupProps) {
             <div className="bg-gray-300/20 backdrop-blur-2xl p-6 sm:p-8 rounded-xl shadow-2xl border border-white/10">
               {/* Title section inside card */}
               <div className="text-center mb-6">
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-2" style={{ fontFamily: 'Georgia, serif' }}>
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-2" style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }}>
                   Splendor
                 </h1>
                 <p className="text-gray-300 text-sm sm:text-base">
