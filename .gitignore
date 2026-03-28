@@ -42,3 +42,4 @@ pnpm-debug.log*
 .cache
 .vscode
 .vite
+.pnpm-store
