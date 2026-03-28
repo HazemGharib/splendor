@@ -21,6 +21,16 @@ export function assignPlayerColors(playerCount: number, humanColor: PlayerColor)
   return [humanColor, ...others.slice(0, playerCount - 1)];
 }
 
+/** Pass-and-play: one unique color per seat, length must equal player count. */
+export function isValidSeatColorAssignment(
+  colors: PlayerColor[],
+  playerCount: number
+): boolean {
+  if (colors.length !== playerCount) return false;
+  if (new Set(colors).size !== colors.length) return false;
+  return colors.every((c) => ALL_PLAYER_COLORS.includes(c));
+}
+
 export interface TokenInventory {
   emerald: number;
   diamond: number;

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { GameState, GamePhase } from '../models/GameState';
-import { PlayerColor, assignPlayerColors } from '../models/Player';
+import { PlayerColor, assignPlayerColors, isValidSeatColorAssignment } from '../models/Player';
 import { DataLoader } from '../services/DataLoader';
 import { shuffle } from '../utils/shuffle';
 import { GAME_CONSTANTS } from '../utils/constants';
@@ -20,7 +20,11 @@ export interface GameStore extends GameState {
   debugRemoveNoble: (nobleId: string) => void;
   debugReplaceBoardNoble: (boardNobleId: string, replacement: Noble) => void;
   debugSetMarketCard: (level: 1 | 2 | 3, index: number, card: DevelopmentCard) => void;
-  initGame: (playerCount: 2 | 3 | 4, aiCount?: number, humanColor?: PlayerColor) => void;
+  initGame: (
+    playerCount: 2 | 3 | 4,
+    aiCount?: number,
+    colorOrSeatColors?: PlayerColor | PlayerColor[]
+  ) => void;
   takeThreeTokens: (colors: GemColor[]) => void;
   takeTwoTokens: (color: GemColor) => void;
   purchaseCard: (cardId: string, fromReserved?: boolean) => void;
@@ -171,7 +175,7 @@ export const useGameStore = create<GameStore>()(
         }
       }),
 
-    initGame: (playerCount, aiCount = 0, humanColor = PlayerColor.RED) =>
+    initGame: (playerCount, aiCount = 0, colorOrSeatColors = PlayerColor.RED) =>
       set((state) => {
         const gemTokenCount =
           playerCount === 2
@@ -187,7 +191,15 @@ export const useGameStore = create<GameStore>()(
             ? GAME_CONSTANTS.NOBLES.COUNT_3P
             : GAME_CONSTANTS.NOBLES.COUNT_4P;
 
-        const playerColors = assignPlayerColors(playerCount, humanColor);
+        let playerColors: PlayerColor[];
+        if (Array.isArray(colorOrSeatColors)) {
+          if (!isValidSeatColorAssignment(colorOrSeatColors, playerCount)) {
+            return;
+          }
+          playerColors = colorOrSeatColors;
+        } else {
+          playerColors = assignPlayerColors(playerCount, colorOrSeatColors);
+        }
         state.players = Array.from({ length: playerCount }, (_, i) => ({
           id: `p${i + 1}`,
           color: playerColors[i],

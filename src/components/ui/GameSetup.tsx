@@ -1,153 +1,215 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Button } from '../design-system/Button';
 import { useSplendorTitleDebugTap } from '../../hooks/useDebugEasterEgg';
-import { PlayerColor } from '../../models/Player';
+import { PlayerColor, assignPlayerColors } from '../../models/Player';
 import { cn } from '../../utils/cn';
 
 interface GameSetupProps {
-  onStart: (playerCount: 2 | 3 | 4, aiCount: number, yourColor: PlayerColor) => void;
+  onStart: (
+    playerCount: 2 | 3 | 4,
+    aiCount: number,
+    colors: PlayerColor | PlayerColor[]
+  ) => void;
 }
 
-const colorChoice: { value: PlayerColor; label: string; swatch: string }[] = [
-  { value: PlayerColor.RED, label: 'Red', swatch: 'bg-red-500 ring-red-400' },
-  { value: PlayerColor.BLUE, label: 'Blue', swatch: 'bg-blue-500 ring-blue-400' },
-  { value: PlayerColor.GREEN, label: 'Green', swatch: 'bg-green-500 ring-green-400' },
-  { value: PlayerColor.YELLOW, label: 'Yellow', swatch: 'bg-yellow-400 ring-yellow-300' },
+const colorChoice: { value: PlayerColor; swatch: string }[] = [
+  { value: PlayerColor.RED, swatch: 'bg-red-500 ring-red-400' },
+  { value: PlayerColor.BLUE, swatch: 'bg-blue-500 ring-blue-400' },
+  { value: PlayerColor.GREEN, swatch: 'bg-green-500 ring-green-400' },
+  { value: PlayerColor.YELLOW, swatch: 'bg-yellow-400 ring-yellow-300' },
 ];
+
+function SwatchRow({
+  selected,
+  onPick,
+}: {
+  selected: PlayerColor;
+  onPick: (c: PlayerColor) => void;
+}) {
+  return (
+    <div className="flex flex-1 justify-end gap-1 sm:gap-1.5">
+      {colorChoice.map(({ value, swatch }) => (
+        <button
+          key={value}
+          type="button"
+          aria-label={`${value} token`}
+          aria-pressed={selected === value}
+          onClick={() => onPick(value)}
+          className={cn(
+            'h-7 w-7 sm:h-8 sm:w-8 shrink-0 rounded-full ring-2 ring-offset-1 ring-offset-gray-900/90 transition-transform touch-manipulation',
+            swatch,
+            selected === value
+              ? 'ring-white ring-offset-gray-900 scale-105 shadow-md'
+              : 'ring-transparent opacity-75 hover:opacity-100'
+          )}
+        />
+      ))}
+    </div>
+  );
+}
 
 export function GameSetup({ onStart }: GameSetupProps) {
   const [selectedCount, setSelectedCount] = useState<2 | 3 | 4>(2);
   const [playAgainstAI, setPlayAgainstAI] = useState(true);
   const [yourColor, setYourColor] = useState<PlayerColor>(PlayerColor.RED);
+  const [seatColors, setSeatColors] = useState<PlayerColor[]>(() =>
+    assignPlayerColors(2, PlayerColor.RED)
+  );
   const onSplendorTitleDebugTap = useSplendorTitleDebugTap();
+
+  const setPlayerCount = useCallback((count: 2 | 3 | 4) => {
+    setSelectedCount(count);
+    setSeatColors((prev) => {
+      if (playAgainstAI) return prev;
+      if (prev.length === count) return prev;
+      if (prev.length < count) {
+        return assignPlayerColors(count, prev[0] ?? PlayerColor.RED);
+      }
+      return prev.slice(0, count);
+    });
+  }, [playAgainstAI]);
+
+  const updateSeatColor = useCallback((seatIndex: number, color: PlayerColor) => {
+    setSeatColors((prev) => {
+      const next = [...prev];
+      const otherIdx = next.findIndex((c, j) => c === color && j !== seatIndex);
+      if (otherIdx >= 0) {
+        next[otherIdx] = next[seatIndex];
+      }
+      next[seatIndex] = color;
+      return next;
+    });
+  }, []);
+
+  const togglePlayAgainstAI = () => {
+    if (playAgainstAI) {
+      setSeatColors(assignPlayerColors(selectedCount, yourColor));
+      setPlayAgainstAI(false);
+    } else {
+      setYourColor(seatColors[0] ?? PlayerColor.RED);
+      setPlayAgainstAI(true);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-950">
-      {/* Mobile: Stacked layout, Desktop: Side-by-side */}
       <div className="min-h-screen flex flex-col lg:flex-row">
-        {/* Art Section - Full width on mobile, 60% on desktop */}
-        <div className="relative w-full lg:w-[60%] h-[40vh] lg:h-screen flex-shrink-0">
-          <img 
-            src="/assets/splendor-splash.png" 
-            alt="Splendor" 
+        <div className="relative w-full lg:w-[60%] h-[36vh] sm:h-[40vh] lg:h-screen flex-shrink-0">
+          <img
+            src="/assets/splendor-splash.png"
+            alt="Splendor"
             className="w-full h-full object-cover"
           />
-          {/* Gradient overlay - transparent to dark gray on mobile, lighter on desktop */}
           <div className="absolute inset-0 bg-gradient-to-b lg:bg-gradient-to-r from-transparent via-gray-950/30 to-gray-950 lg:from-gray-950/60 lg:via-gray-950/0 lg:to-gray-950/95" />
         </div>
-        
-        {/* Setup Section - 40% on desktop, full width on mobile */}
-        <div className="flex-1 flex items-center justify-center p-4 lg:p-8 bg-gray-950">
+
+        <div className="flex-1 flex items-start lg:items-center justify-center p-3 sm:p-4 lg:p-8 bg-gray-950">
           <div className="w-full max-w-md">
-            {/* Game Setup Controls */}
-            <div className="bg-gray-300/20 backdrop-blur-2xl p-6 sm:p-8 rounded-xl shadow-2xl border border-white/10">
-              {/* Title section inside card */}
-              <div className="text-center mb-6">
+            <div className="bg-gray-300/20 backdrop-blur-2xl p-4 sm:p-5 rounded-xl shadow-2xl border border-white/10">
+              <div className="text-center mb-3 sm:mb-4">
                 <h1
-                  className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-2 select-none"
+                  className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-1 select-none"
                   style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }}
                   onClick={onSplendorTitleDebugTap}
                 >
                   Splendor
                 </h1>
-                <p className="text-gray-300 text-sm sm:text-base">
-                  Craft Your Way to Nobility
-                </p>
+                <p className="text-gray-300 text-xs sm:text-sm">Craft Your Way to Nobility</p>
               </div>
-              
-              {/* Divider */}
-              <div className="h-px bg-gradient-to-r from-transparent via-gray-600/50 to-transparent mb-6" />
-              
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-3">
-                    Number of Players
-                  </label>
-                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                    {([2, 3, 4] as const).map((count) => (
-                      <button
-                        key={count}
-                        onClick={() => setSelectedCount(count)}
+
+              <div className="h-px bg-gradient-to-r from-transparent via-gray-600/50 to-transparent mb-3 sm:mb-4" />
+
+              <div className="space-y-3 sm:space-y-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-3">
+                  <div className="flex-1 min-w-0">
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Players</label>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {([2, 3, 4] as const).map((count) => (
+                        <button
+                          key={count}
+                          type="button"
+                          onClick={() => setPlayerCount(count)}
+                          className={cn(
+                            'py-2 rounded-lg text-sm font-semibold transition-colors touch-manipulation min-h-[44px]',
+                            selectedCount === count
+                              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/40'
+                              : 'bg-white/10 text-gray-200 hover:bg-white/20 border border-white/15'
+                          )}
+                        >
+                          {count}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0 sm:max-w-[200px]">
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Mode</label>
+                    <button
+                      type="button"
+                      onClick={togglePlayAgainstAI}
+                      className={cn(
+                        'w-full py-2 px-3 rounded-lg text-sm font-semibold transition-all touch-manipulation min-h-[44px] flex items-center justify-between gap-2',
+                        playAgainstAI
+                          ? 'bg-purple-600 text-white shadow-md shadow-purple-600/40'
+                          : 'bg-white/10 text-gray-200 hover:bg-white/20 border border-white/15'
+                      )}
+                    >
+                      <span className="truncate">{playAgainstAI ? 'vs AI' : 'Pass & play'}</span>
+                      <div
                         className={cn(
-                          'py-3 px-4 rounded-lg font-semibold transition-colors touch-manipulation min-h-[48px]',
-                          selectedCount === count
-                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/50'
-                            : 'bg-white/10 text-gray-200 hover:bg-white/20 active:bg-white/15 border border-white/20'
+                          'w-10 h-5 shrink-0 rounded-full relative transition-colors',
+                          playAgainstAI ? 'bg-purple-400' : 'bg-white/30'
                         )}
                       >
-                        {count}
-                      </button>
-                    ))}
+                        <div
+                          className={cn(
+                            'absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform shadow-sm',
+                            playAgainstAI ? 'translate-x-5' : 'translate-x-0.5'
+                          )}
+                        />
+                      </div>
+                    </button>
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-3">
-                    Your color
-                  </label>
-                  <p className="text-xs text-gray-400 mb-3">
-                    Your panel uses this color. Other seats use the remaining colors.
-                  </p>
-                  <div className="grid grid-cols-4 gap-2 sm:gap-3">
-                    {colorChoice.map(({ value, label, swatch }) => (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() => setYourColor(value)}
-                        className={cn(
-                          'flex flex-col items-center gap-2 rounded-xl py-3 px-2 border transition-all touch-manipulation min-h-[72px]',
-                          yourColor === value
-                            ? 'border-white/60 bg-white/15 ring-2 ring-white/40'
-                            : 'border-white/10 bg-white/5 hover:bg-white/10'
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            'h-8 w-8 rounded-full ring-2 ring-offset-2 ring-offset-gray-900/80',
-                            swatch
-                          )}
-                          aria-hidden
-                        />
-                        <span className="text-[11px] font-medium text-gray-200 capitalize">{label}</span>
-                      </button>
-                    ))}
+                {playAgainstAI ? (
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Your color</label>
+                    <SwatchRow selected={yourColor} onPick={setYourColor} />
+                    <p className="text-[10px] text-gray-500 mt-1.5 leading-snug">
+                      Seat 1 (you). AI uses the other colors.
+                    </p>
                   </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-3">
-                    Game Mode
-                  </label>
-                  <button
-                    onClick={() => setPlayAgainstAI(!playAgainstAI)}
-                    className={cn(
-                      'w-full py-3 px-4 rounded-lg font-semibold transition-all touch-manipulation min-h-[48px] flex items-center justify-between',
-                      playAgainstAI
-                        ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/50'
-                        : 'bg-white/10 text-gray-200 hover:bg-white/20 active:bg-white/15 border border-white/20'
-                    )}
-                  >
-                    <span>Play Against AI</span>
-                    <div className={cn(
-                      'w-12 h-6 rounded-full transition-colors relative',
-                      playAgainstAI ? 'bg-purple-400' : 'bg-white/30'
-                    )}>
-                      <div className={cn(
-                        'absolute top-1 w-4 h-4 rounded-full bg-white transition-transform shadow-md',
-                        playAgainstAI ? 'translate-x-7' : 'translate-x-1'
-                      )} />
+                ) : (
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">
+                      Player colors
+                    </label>
+                    <p className="text-[10px] text-gray-500 mb-2 leading-snug">
+                      One color per seat (turn order 1→{selectedCount}). Tap another seat’s color to swap.
+                    </p>
+                    <div className="space-y-1.5">
+                      {Array.from({ length: selectedCount }, (_, i) => (
+                        <div key={i} className="flex items-center gap-2 min-h-[36px]">
+                          <span className="w-auto shrink-0 text-center text-[11px] font-bold text-gray-500 tabular-nums">
+                            {`Player ${i + 1}`}
+                          </span>
+                          <SwatchRow
+                            selected={seatColors[i]!}
+                            onPick={(c) => updateSeatColor(i, c)}
+                          />
+                        </div>
+                      ))}
                     </div>
-                  </button>
-                  <p className="text-xs text-gray-400 mt-2">
-                    {playAgainstAI 
-                      ? `You vs ${selectedCount - 1} AI opponent${selectedCount > 2 ? 's' : ''}`
-                      : 'Pass-and-play mode (all human players)'}
-                  </p>
-                </div>
-                
+                  </div>
+                )}
+
                 <Button
                   onClick={() =>
-                    onStart(selectedCount, playAgainstAI ? selectedCount - 1 : 0, yourColor)
+                    onStart(
+                      selectedCount,
+                      playAgainstAI ? selectedCount - 1 : 0,
+                      playAgainstAI ? yourColor : seatColors
+                    )
                   }
                   className="w-full shadow-lg"
                   size="lg"
