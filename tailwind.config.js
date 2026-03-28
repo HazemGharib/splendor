@@ -27,16 +27,11 @@ export default {
       },
       animation: {
         'card-flip': 'flip 0.6s ease-in-out',
-        'token-collect': 'collect 0.4s ease-out',
       },
       keyframes: {
         flip: {
           '0%': { transform: 'rotateY(0deg)' },
           '100%': { transform: 'rotateY(180deg)' },
-        },
-        collect: {
-          '0%': { transform: 'scale(1)', opacity: '1' },
-          '100%': { transform: 'scale(0.8)', opacity: '0.6' },
         },
       },
     },
