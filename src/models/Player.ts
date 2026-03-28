@@ -28,6 +28,7 @@ export interface BonusInventory {
 export interface PlayerState {
   id: string;
   color: PlayerColor;
+  isAI: boolean;
   tokens: TokenInventory;
   bonuses: BonusInventory;
   cards: DevelopmentCard[];

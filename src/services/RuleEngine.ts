@@ -6,10 +6,22 @@ import { Noble } from '../models/Noble';
 import { PlayerState } from '../models/Player';
 
 export class RuleEngine {
+  static getTotalTokenCount(tokens: TokenInventory): number {
+    return Object.values(tokens).reduce((sum, val) => sum + val, 0);
+  }
+
   static validateTakeThreeTokens(
     colors: GemColor[],
-    tokenSupply: TokenSupply
+    tokenSupply: TokenSupply,
+    playerTokens: TokenInventory
   ): { valid: boolean; error?: string } {
+    const totalTokens = this.getTotalTokenCount(playerTokens);
+    
+    // Check if taking tokens would exceed limit
+    if (totalTokens + 3 > GAME_CONSTANTS.PLAYER.MAX_TOKENS) {
+      return { valid: false, error: `Cannot take tokens - would exceed 10 token limit (currently have ${totalTokens})` };
+    }
+
     if (colors.length !== 3) {
       return { valid: false, error: 'Must select exactly 3 tokens' };
     }
@@ -34,8 +46,16 @@ export class RuleEngine {
 
   static validateTakeTwoTokens(
     color: GemColor,
-    tokenSupply: TokenSupply
+    tokenSupply: TokenSupply,
+    playerTokens: TokenInventory
   ): { valid: boolean; error?: string } {
+    const totalTokens = this.getTotalTokenCount(playerTokens);
+    
+    // Check if taking 2 tokens would exceed limit
+    if (totalTokens + 2 > GAME_CONSTANTS.PLAYER.MAX_TOKENS) {
+      return { valid: false, error: `Cannot take tokens - would exceed 10 token limit (currently have ${totalTokens})` };
+    }
+
     if (color === GemColor.GOLD) {
       return { valid: false, error: 'Cannot take gold tokens this way' };
     }
