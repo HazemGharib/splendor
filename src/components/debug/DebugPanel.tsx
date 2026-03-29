@@ -1,12 +1,120 @@
 import { useState, useEffect, useRef } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { DataLoader } from '../../services/DataLoader';
-import { GemColor } from '../../models/Card';
+import { CardBonus, DevelopmentCard, GemColor } from '../../models/Card';
 import { DevelopmentCardComponent } from '../game/Card/DevelopmentCard';
 import { GemToken } from '../game/Token/GemToken';
 import { NobleTile } from '../game/Noble/NobleTile';
 import { Noble } from '../../models/Noble';
 import { cn } from '../../utils/cn';
+
+/**
+ * Must match `DebugCardMini` clip width. Panel max-width = horizontal padding + 4 slots + 3× flex gap-1.5.
+ * gap-1.5 = 0.375rem per Tailwind default.
+ */
+const DEBUG_CARD_SLOT_PX = 85;
+const DEBUG_PANEL_MAX_WIDTH = `min(calc(100vw - 2rem), calc(34px + (4 * ${DEBUG_CARD_SLOT_PX}px) + (3 * 0.375rem)))`;
+
+/** Scaled-down card for dense debug lists (full card is w-44 h-60). */
+function DebugCardMini({
+  card,
+  onClick,
+  actionVerb,
+}: {
+  card: DevelopmentCard;
+  onClick: () => void;
+  actionVerb: 'Add' | 'Remove';
+}) {
+  return (
+    <button
+      type="button"
+      className="flex-shrink-0 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 transition hover:opacity-90 active:opacity-100"
+      onClick={onClick}
+    >
+      <span className="sr-only">
+        {actionVerb} card {card.id}
+      </span>
+      <div
+        className="h-[116px] overflow-hidden rounded-lg"
+        style={{ width: DEBUG_CARD_SLOT_PX }}
+      >
+        <div className="origin-top-left scale-[0.48] pointer-events-none">
+          <DevelopmentCardComponent card={card} />
+        </div>
+      </div>
+    </button>
+  );
+}
+
+const BONUS_ORDER: CardBonus[] = [
+  GemColor.EMERALD,
+  GemColor.DIAMOND,
+  GemColor.SAPPHIRE,
+  GemColor.ONYX,
+  GemColor.RUBY,
+];
+
+/** Level → bonus gem → mini cards. `picker` shows empty levels; `hand` omits levels with no cards. */
+function DebugDevelopmentCardsGrouped({
+  cards,
+  onCardClick,
+  actionVerb,
+  variant,
+}: {
+  cards: DevelopmentCard[];
+  onCardClick: (card: DevelopmentCard) => void;
+  actionVerb: 'Add' | 'Remove';
+  variant: 'picker' | 'hand';
+}) {
+  return (
+    <div className="space-y-4">
+      {([1, 2, 3] as const).map((level) => {
+        const atLevel = cards.filter((c) => c.level === level);
+        if (variant === 'hand' && atLevel.length === 0) return null;
+        if (variant === 'picker' && atLevel.length === 0) {
+          return (
+            <div key={level}>
+              <div className="text-xs font-semibold text-gray-300 mb-1">Level {level}</div>
+              <div className="text-gray-500 text-xs italic py-1">
+                No cards left to add at this level
+              </div>
+            </div>
+          );
+        }
+        return (
+          <div key={level}>
+            <div className="text-xs font-semibold text-gray-300 mb-2 border-b border-white/10 pb-1">
+              Level {level}
+            </div>
+            <div className="space-y-2">
+              {BONUS_ORDER.map((bonus) => {
+                const group = atLevel.filter((c) => c.bonus === bonus);
+                if (group.length === 0) return null;
+                return (
+                  <div key={bonus}>
+                    <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 mb-1.5 pl-0.5">
+                      {bonus}
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {group.map((card) => (
+                        <DebugCardMini
+                          key={card.id}
+                          card={card}
+                          actionVerb={actionVerb}
+                          onClick={() => onCardClick(card)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 function DebugNobleTile({
   noble,
@@ -57,6 +165,7 @@ export function DebugPanel() {
     debugMode, 
     players, 
     currentPlayerIndex,
+    cardMarket,
     nobles: availableNobles,
     debugAddCard,
     debugRemoveCard,
@@ -68,6 +177,7 @@ export function DebugPanel() {
     toggleDebugMode,
   } = useGameStore();
   const [selectedTab, setSelectedTab] = useState<'tokens' | 'cards' | 'nobles'>('tokens');
+  const [cardsSubTab, setCardsSubTab] = useState<'hand' | 'picker'>('hand');
   const [pendingBoardReplaceId, setPendingBoardReplaceId] = useState<string | null>(null);
   const [showCheeseOverlay, setShowCheeseOverlay] = useState(false);
   const dismissAllowedAfterRef = useRef(0);
@@ -104,6 +214,25 @@ export function DebugPanel() {
 
   const allCards = DataLoader.loadCards();
   const allNobles = DataLoader.loadNobles();
+
+  const idsHeldByAnyone = new Set(
+    players.flatMap((p) => [
+      ...p.cards.map((c) => c.id),
+      ...p.reservedCards.map((c) => c.id),
+    ])
+  );
+
+  const isCardInSupply = (card: DevelopmentCard) => {
+    const key = `level${card.level}` as 'level1' | 'level2' | 'level3';
+    const m = cardMarket[key];
+    return (
+      m.visible.some((c) => c.id === card.id) || m.deck.some((c) => c.id === card.id)
+    );
+  };
+
+  const cardsAddableFromDebug = allCards.filter(
+    (c) => !idsHeldByAnyone.has(c.id) && isCardInSupply(c)
+  );
   const noblesAvailableForBoardSwap = allNobles.filter(
     (n) => !nobleIsInPlay(n.id, availableNobles, players)
   );
@@ -131,7 +260,8 @@ export function DebugPanel() {
         onClick={handleBackdropPointerDown}
       />
       <div
-        className="debug-panel-enter fixed bottom-4 left-4 right-4 z-50 max-h-[60vh] overflow-hidden rounded-2xl border border-white/20 bg-gradient-to-br from-violet-950/45 via-purple-950/35 to-indigo-950/45 p-4 shadow-2xl shadow-black/40 backdrop-blur-2xl ring-1 ring-white/10 lg:left-auto lg:right-6 lg:w-[min(560px,calc(100vw-2rem))]"
+        className="debug-panel-enter fixed bottom-4 left-4 z-50 flex max-h-[min(78vh,720px)] min-w-0 min-h-[min(78vh,720px)] flex-col overflow-hidden rounded-2xl border border-white/20 bg-gradient-to-br from-violet-950/45 via-purple-950/35 to-indigo-950/45 p-4 shadow-2xl shadow-black/40 backdrop-blur-2xl ring-1 ring-white/10"
+        style={{ width: DEBUG_PANEL_MAX_WIDTH }}
         role="dialog"
         aria-label="Debug panel"
         aria-modal="false"
@@ -170,7 +300,7 @@ export function DebugPanel() {
           </div>
         )}
 
-      <div className="flex items-center justify-between mb-3">
+      <div className="mb-3 flex shrink-0 items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-2xl">🐞</span>
           <h2 className="text-xl font-bold text-white">Debug Mode</h2>
@@ -181,7 +311,7 @@ export function DebugPanel() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-3">
+      <div className="mb-3 flex shrink-0 gap-2">
         {(['tokens', 'cards', 'nobles'] as const).map((tab) => (
           <button
             key={tab}
@@ -202,7 +332,7 @@ export function DebugPanel() {
       </div>
 
       {/* Content */}
-      <div className="overflow-y-auto max-h-[40vh]">
+      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
         {selectedTab === 'tokens' && (
           <div className="space-y-4">
             <div className="text-sm text-gray-300 mb-2">
@@ -235,51 +365,85 @@ export function DebugPanel() {
         )}
 
         {selectedTab === 'cards' && (
-          <div className="space-y-4">
-            <div>
-              <div className="text-sm text-gray-300 mb-2">
-                Your Cards (click to remove)
-              </div>
-              <div className="flex gap-2 flex-wrap">
+          <div className="space-y-3">
+            <div
+              className="flex gap-2 p-1 rounded-xl bg-black/25 border border-white/10"
+              role="tablist"
+              aria-label="Card debug views"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={cardsSubTab === 'hand'}
+                id="debug-cards-tab-hand"
+                onClick={() => setCardsSubTab('hand')}
+                className={cn(
+                  'flex-1 rounded-lg px-3 py-2 text-xs sm:text-sm font-semibold transition-all',
+                  cardsSubTab === 'hand'
+                    ? 'bg-purple-600 text-white shadow-md'
+                    : 'text-gray-400 hover:text-white hover:bg-white/10'
+                )}
+              >
+                Your hand
+                <span className="ml-1 tabular-nums opacity-80">({currentPlayer.cards.length})</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={cardsSubTab === 'picker'}
+                id="debug-cards-tab-add"
+                onClick={() => setCardsSubTab('picker')}
+                className={cn(
+                  'flex-1 rounded-lg px-3 py-2 text-xs sm:text-sm font-semibold transition-all',
+                  cardsSubTab === 'picker'
+                    ? 'bg-purple-600 text-white shadow-md'
+                    : 'text-gray-400 hover:text-white hover:bg-white/10'
+                )}
+              >
+                Add cards
+                <span className="ml-1 tabular-nums opacity-80">({cardsAddableFromDebug.length})</span>
+              </button>
+            </div>
+
+            {cardsSubTab === 'hand' && (
+              <div
+                role="tabpanel"
+                aria-labelledby="debug-cards-tab-hand"
+                className="pt-1"
+              >
+                <p className="text-xs text-gray-500 mb-2">
+                  Click a tile to remove it from your purchased cards. Grouped by level, then bonus gem.
+                </p>
                 {currentPlayer.cards.length === 0 ? (
                   <div className="text-gray-500 text-sm italic">No cards yet</div>
                 ) : (
-                  currentPlayer.cards.map((card) => (
-                    <div key={card.id} className="cursor-pointer hover:opacity-75 transition-opacity">
-                      <DevelopmentCardComponent
-                        card={card}
-                        onClick={() => debugRemoveCard(card.id)}
-                      />
-                    </div>
-                  ))
+                  <DebugDevelopmentCardsGrouped
+                    cards={currentPlayer.cards}
+                    onCardClick={(card) => debugRemoveCard(card.id)}
+                    actionVerb="Remove"
+                    variant="hand"
+                  />
                 )}
               </div>
-            </div>
+            )}
 
-            <div>
-              <div className="text-sm text-gray-300 mb-2">
-                All Available Cards (click to add)
+            {cardsSubTab === 'picker' && (
+              <div
+                role="tabpanel"
+                aria-labelledby="debug-cards-tab-add"
+                className="pt-1"
+              >
+                <p className="text-xs text-gray-500 mb-2">
+                  Cards still in supply (visible market or deck). Adding pulls from the market—slot refills from the deck—or from the deck only. None held by any player.
+                </p>
+                <DebugDevelopmentCardsGrouped
+                  cards={cardsAddableFromDebug}
+                  onCardClick={(card) => debugAddCard(card)}
+                  actionVerb="Add"
+                  variant="picker"
+                />
               </div>
-              <div className="space-y-3">
-                {[1, 2, 3].map((level) => (
-                  <div key={level}>
-                    <div className="text-xs text-gray-400 mb-1">Level {level}</div>
-                    <div className="flex gap-2 overflow-x-auto pb-2">
-                      {allCards
-                        .filter((c) => c.level === level)
-                        .map((card) => (
-                          <div key={card.id} className="flex-shrink-0 cursor-pointer hover:scale-105 transition-transform">
-                            <DevelopmentCardComponent
-                              card={card}
-                              onClick={() => debugAddCard(card)}
-                            />
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            )}
           </div>
         )}
 
@@ -407,7 +571,7 @@ export function DebugPanel() {
         )}
       </div>
 
-      <div className="mt-3 pt-3 border-t border-purple-500/30">
+      <div className="mt-3 shrink-0 border-t border-purple-500/30 pt-3">
         <div className="text-xs text-gray-400">
           Debug mode allows you to manipulate game state for testing purposes
         </div>
