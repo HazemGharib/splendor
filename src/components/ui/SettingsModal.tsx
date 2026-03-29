@@ -4,7 +4,6 @@ import {
   ModalContent,
   ModalHeader,
   ModalTitle,
-  ModalDescription,
   ModalTrigger,
 } from '../design-system/Modal';
 import { Button } from '../design-system/Button';
@@ -27,19 +26,15 @@ export function SettingsModal() {
           ⚙️
         </Button>
       </ModalTrigger>
-      <ModalContent>
+      <ModalContent className="lg:max-w-2xl max-w-sm max-h-max overflow-y-auto rounded-xl">
         <ModalHeader>
-          <ModalTitle className="text-2xl font-bold text-white">Settings</ModalTitle>
-          <ModalDescription className="text-gray-400">Configure game preferences</ModalDescription>
+          <ModalTitle className="text-4xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 text-transparent bg-clip-text" style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }}>Settings</ModalTitle>
         </ModalHeader>
         
         <div className="space-y-4 py-4">
           <div className="flex items-center justify-between">
             <div>
               <div className="font-medium text-white">Background music</div>
-              <div className="text-sm text-white">
-                Streams the OST (MP3); loading starts only after you interact with the page
-              </div>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
@@ -60,7 +55,7 @@ export function SettingsModal() {
           <div className="flex items-center justify-between">
             <div>
               <div className="font-medium text-white">Colorblind Mode</div>
-              <div className="text-sm text-white">
+              <div className="text-xs text-gray-400">
                 Add patterns to gem tokens for better accessibility
               </div>
             </div>

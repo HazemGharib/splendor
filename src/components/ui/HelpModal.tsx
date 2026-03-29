@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
   Modal,
   ModalContent,
@@ -11,6 +11,28 @@ import { DevelopmentCardComponent } from '../game/Card/DevelopmentCard';
 import { DevelopmentCard, GemColor } from '../../models/Card';
 import { NobleTile } from '../game/Noble/NobleTile';
 import { Noble } from '../../models/Noble';
+import { cn } from '../../utils/cn';
+
+/** Dev cards & nobles are built as w-44 × h-60 (11∶15). Scale uniformly inside a fixed-aspect frame. */
+function HelpModalTileFrame({
+  className,
+  children,
+}: {
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className={cn(
+        'shrink-0 overflow-hidden rounded-lg shadow-md ring-1 ring-white/10',
+        'h-[149px] w-[109px] sm:h-[188px] sm:w-[137px]',
+        className
+      )}
+    >
+      <div className="origin-top-left scale-[0.62] h-60 w-44 sm:scale-[0.779]">{children}</div>
+    </div>
+  );
+}
 
 export function HelpModal() {
   const [open, setOpen] = useState(false);
@@ -81,8 +103,8 @@ export function HelpModal() {
             </ul>
           </section>
 
-          <section className="flex flex-row gap-4 items-center">
-            <div className="flex flex-col gap-2 w-7/12">
+          <section className="flex flex-row items-start gap-3 sm:gap-6">
+            <div className="min-w-0 flex-1 flex flex-col gap-2">
               <h3 className="font-semibold mb-2 text-white text-lg" style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }}>
                 Cards & Bonuses
               </h3>
@@ -99,13 +121,15 @@ export function HelpModal() {
                 The cost is calculated by subtracting the bonuses you have from the card's cost.
               </p>
             </div>
-            <div className="flex items-center justify-center w-5/12">
-              <DevelopmentCardComponent card={exampleCard} />
+            <div className="shrink-0 self-start pt-0.5 sm:pt-1">
+              <HelpModalTileFrame>
+                <DevelopmentCardComponent card={exampleCard} />
+              </HelpModalTileFrame>
             </div>
           </section>
 
-          <section className="flex flex-row gap-4 items-center">
-            <div className="flex flex-col gap-6 w-7/12">
+          <section className="flex flex-row items-start gap-3 sm:gap-6">
+            <div className="min-w-0 flex-1 flex flex-col gap-6">
               <section>
                 <h3 className="font-semibold mb-2 text-white text-lg" style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }}>
                   Nobles
@@ -125,8 +149,10 @@ export function HelpModal() {
                 </ul>
               </section>
             </div>
-            <div className="flex items-center justify-center w-5/12">
-              <NobleTile noble={exampleNoble} />
+            <div className="shrink-0 self-start pt-0.5 sm:pt-1">
+              <HelpModalTileFrame>
+                <NobleTile noble={exampleNoble} />
+              </HelpModalTileFrame>
             </div>
           </section>
         </div>

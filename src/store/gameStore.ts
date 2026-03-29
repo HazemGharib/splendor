@@ -91,9 +91,45 @@ export const useGameStore = create<GameStore>()(
       set((state) => {
         if (!state.debugMode) return;
         const currentPlayer = state.players[state.currentPlayerIndex];
-        currentPlayer.cards.push(card);
-        currentPlayer.bonuses[card.bonus] += 1;
-        currentPlayer.prestige += card.prestige;
+        if (currentPlayer.cards.some((c) => c.id === card.id)) return;
+        if (currentPlayer.reservedCards.some((c) => c.id === card.id)) return;
+
+        const heldElsewhere = state.players.some(
+          (p, i) =>
+            i !== state.currentPlayerIndex &&
+            (p.cards.some((c) => c.id === card.id) ||
+              p.reservedCards.some((c) => c.id === card.id))
+        );
+        if (heldElsewhere) return;
+
+        const levelKey = `level${card.level}` as 'level1' | 'level2' | 'level3';
+        const market = state.cardMarket[levelKey];
+
+        let taken: DevelopmentCard | undefined;
+
+        const visIdx = market.visible.findIndex((c) => c.id === card.id);
+        if (visIdx >= 0) {
+          taken = market.visible[visIdx];
+          market.visible.splice(visIdx, 1);
+          if (market.deck.length > 0) {
+            const nextCard = market.deck.shift();
+            if (nextCard) {
+              market.visible.push(nextCard);
+            }
+          }
+        } else {
+          const deckIdx = market.deck.findIndex((c) => c.id === card.id);
+          if (deckIdx >= 0) {
+            taken = market.deck[deckIdx];
+            market.deck.splice(deckIdx, 1);
+          }
+        }
+
+        if (!taken) return;
+
+        currentPlayer.cards.push(taken);
+        currentPlayer.bonuses[taken.bonus] += 1;
+        currentPlayer.prestige += taken.prestige;
       }),
 
     debugRemoveCard: (cardId) =>
@@ -101,11 +137,21 @@ export const useGameStore = create<GameStore>()(
         if (!state.debugMode) return;
         const currentPlayer = state.players[state.currentPlayerIndex];
         const cardIndex = currentPlayer.cards.findIndex((c) => c.id === cardId);
-        if (cardIndex >= 0) {
-          const card = currentPlayer.cards[cardIndex];
-          currentPlayer.cards.splice(cardIndex, 1);
-          currentPlayer.bonuses[card.bonus] = Math.max(0, currentPlayer.bonuses[card.bonus] - 1);
-          currentPlayer.prestige = Math.max(0, currentPlayer.prestige - card.prestige);
+        if (cardIndex < 0) return;
+
+        const card = currentPlayer.cards[cardIndex];
+        currentPlayer.cards.splice(cardIndex, 1);
+        currentPlayer.bonuses[card.bonus] = Math.max(0, currentPlayer.bonuses[card.bonus] - 1);
+        currentPlayer.prestige = Math.max(0, currentPlayer.prestige - card.prestige);
+
+        const levelKey = `level${card.level}` as 'level1' | 'level2' | 'level3';
+        const market = state.cardMarket[levelKey];
+        const maxVisible = GAME_CONSTANTS.CARDS.VISIBLE_PER_LEVEL;
+
+        if (market.visible.length < maxVisible) {
+          market.visible.push(card);
+        } else {
+          market.deck.push(card);
         }
       }),
 
