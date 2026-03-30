@@ -40,9 +40,46 @@ export function GameBoard() {
   } = useGameStore();
 
   const [isAIThinking, setIsAIThinking] = useState(false);
+  const [titleBlessingActive, setTitleBlessingActive] = useState(false);
   const aiTurnInProgressRef = useRef(false);
+  const titleTapTimesRef = useRef<number[]>([]);
+  const titleBlessingTimeoutRef = useRef<number | null>(null);
   const currentPlayer = players[currentPlayerIndex];
   const onSplendorTitleDebugTap = useSplendorTitleDebugTap();
+
+  const TITLE_BLESSING_WINDOW_MS = 5000;
+  const TITLE_BLESSING_TAPS_REQUIRED = 5;
+  const TITLE_BLESSING_DURATION_MS = 10000;
+
+  const handleSplendorTitleTap = () => {
+    // Existing easter egg: rapid taps toggles debug mode.
+    onSplendorTitleDebugTap();
+
+    // New easter egg: a longer hidden tap run triggers a temporary "royal glow".
+    const now = Date.now();
+    titleTapTimesRef.current = titleTapTimesRef.current.filter((t) => now - t < TITLE_BLESSING_WINDOW_MS);
+    titleTapTimesRef.current.push(now);
+
+    if (titleTapTimesRef.current.length >= TITLE_BLESSING_TAPS_REQUIRED) {
+      titleTapTimesRef.current = [];
+      setTitleBlessingActive(true);
+      if (titleBlessingTimeoutRef.current) {
+        window.clearTimeout(titleBlessingTimeoutRef.current);
+      }
+      titleBlessingTimeoutRef.current = window.setTimeout(() => {
+        setTitleBlessingActive(false);
+        titleBlessingTimeoutRef.current = null;
+      }, TITLE_BLESSING_DURATION_MS);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (titleBlessingTimeoutRef.current) {
+        window.clearTimeout(titleBlessingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // AI turn logic - runs when it's an AI player's turn
   useEffect(() => {
@@ -167,9 +204,13 @@ export function GameBoard() {
         {/* Header */}
         <div className="flex justify-between items-center mb-3 sm:mb-4">
           <h1
-            className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white select-none"
+            className={`text-2xl sm:text-3xl lg:text-4xl font-bold select-none transition-all duration-1000 ${
+              titleBlessingActive
+                ? 'text-amber-100 drop-shadow-[0_0_14px_rgba(251,191,36,0.55)] animate-[pulse_2.8s_ease-in-out_infinite]'
+                : 'text-white'
+            }`}
             style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }}
-            onClick={onSplendorTitleDebugTap}
+            onClick={handleSplendorTitleTap}
           >
             Splendor
           </h1>
