@@ -34,7 +34,9 @@ export function GameBoard() {
     initGame, 
     takeThreeTokens, 
     takeTwoTokens,
-    endTurn 
+    endTurn,
+    resumeSavedGame,
+    hasSavedGame,
   } = useGameStore();
 
   const [isAIThinking, setIsAIThinking] = useState(false);
@@ -148,7 +150,13 @@ export function GameBoard() {
   };
 
   if (phase === GamePhase.SETUP) {
-    return <GameSetup onStart={initGame} />;
+    return (
+      <GameSetup
+        onStart={initGame}
+        hasSavedGame={hasSavedGame()}
+        onContinueSavedGame={resumeSavedGame}
+      />
+    );
   }
 
   const isCurrentPlayerAI = currentPlayer?.isAI || false;

@@ -11,6 +11,8 @@ interface GameSetupProps {
     aiCount: number,
     colors: PlayerColor | PlayerColor[]
   ) => void;
+  hasSavedGame?: boolean;
+  onContinueSavedGame?: () => void;
 }
 
 const colorChoice: { value: PlayerColor; swatch: string }[] = [
@@ -49,13 +51,18 @@ function SwatchRow({
   );
 }
 
-export function GameSetup({ onStart }: GameSetupProps) {
+export function GameSetup({
+  onStart,
+  hasSavedGame = false,
+  onContinueSavedGame,
+}: GameSetupProps) {
   const [selectedCount, setSelectedCount] = useState<2 | 3 | 4>(2);
   const [playAgainstAI, setPlayAgainstAI] = useState(true);
   const [yourColor, setYourColor] = useState<PlayerColor>(PlayerColor.RED);
   const [seatColors, setSeatColors] = useState<PlayerColor[]>(() =>
     assignPlayerColors(2, PlayerColor.RED)
   );
+  const [showResumePrompt, setShowResumePrompt] = useState(hasSavedGame);
   const onSplendorTitleDebugTap = useSplendorTitleDebugTap();
 
   const setPlayerCount = useCallback((count: 2 | 3 | 4) => {
@@ -121,6 +128,38 @@ export function GameSetup({ onStart }: GameSetupProps) {
               <div className="h-px bg-gradient-to-r from-transparent via-gray-600/50 to-transparent mb-3 sm:mb-4" />
 
               <div className="space-y-3 sm:space-y-4">
+                {showResumePrompt && (
+                  <div className="rounded-lg border border-amber-500/30 bg-amber-900/20 p-3 space-y-3">
+                    <div>
+                      <div className="text-2xl font-semibold text-amber-300" style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }}>Game in progress</div>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      <Button
+                        onClick={() => {
+                          primeAudioFromUserGesture();
+                          onContinueSavedGame?.();
+                        }}
+                        size="lg"
+                        className="w-full text-lg bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white"
+                        style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }}
+                      >
+                        Continue
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        onClick={() => setShowResumePrompt(false)}
+                        size="lg"
+                        className="w-full text-lg"
+                        style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }}
+                      >
+                        New Game
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {!showResumePrompt && (
+                  <>
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-3">
                   <div className="flex-1 min-w-0">
                     <label className="block text-xs font-medium text-gray-400 mb-1.5">Players</label>
@@ -218,6 +257,8 @@ export function GameSetup({ onStart }: GameSetupProps) {
                 >
                   Start Game
                 </Button>
+                  </>
+                )}
               </div>
             </div>
           </div>
