@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   Modal,
   ModalClose,
@@ -37,6 +37,64 @@ function HelpModalTileFrame({
 
 export function HelpModal() {
   const [open, setOpen] = useState(false);
+  const [cardGlowActive, setCardGlowActive] = useState(false);
+  const [nobleGlowActive, setNobleGlowActive] = useState(false);
+  const cardTapCountRef = useRef(0);
+  const nobleTapCountRef = useRef(0);
+  const cardGlowTimeoutRef = useRef<number | null>(null);
+  const nobleGlowTimeoutRef = useRef<number | null>(null);
+
+  const TAPS_REQUIRED = 4;
+  const GLOW_DURATION_MS = 5000;
+
+  const activateCardGlow = () => {
+    setCardGlowActive(true);
+    if (cardGlowTimeoutRef.current) {
+      window.clearTimeout(cardGlowTimeoutRef.current);
+    }
+    cardGlowTimeoutRef.current = window.setTimeout(() => {
+      setCardGlowActive(false);
+      cardGlowTimeoutRef.current = null;
+    }, GLOW_DURATION_MS);
+  };
+
+  const activateNobleGlow = () => {
+    setNobleGlowActive(true);
+    if (nobleGlowTimeoutRef.current) {
+      window.clearTimeout(nobleGlowTimeoutRef.current);
+    }
+    nobleGlowTimeoutRef.current = window.setTimeout(() => {
+      setNobleGlowActive(false);
+      nobleGlowTimeoutRef.current = null;
+    }, GLOW_DURATION_MS);
+  };
+
+  const handleCardTap = () => {
+    cardTapCountRef.current += 1;
+    if (cardTapCountRef.current >= TAPS_REQUIRED) {
+      cardTapCountRef.current = 0;
+      activateCardGlow();
+    }
+  };
+
+  const handleNobleTap = () => {
+    nobleTapCountRef.current += 1;
+    if (nobleTapCountRef.current >= TAPS_REQUIRED) {
+      nobleTapCountRef.current = 0;
+      activateNobleGlow();
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (cardGlowTimeoutRef.current) {
+        window.clearTimeout(cardGlowTimeoutRef.current);
+      }
+      if (nobleGlowTimeoutRef.current) {
+        window.clearTimeout(nobleGlowTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const exampleCard: DevelopmentCard = {
     bonus: GemColor.EMERALD,
@@ -81,10 +139,20 @@ export function HelpModal() {
           </Button>
         </ModalClose>
         <ModalHeader>
-          <ModalTitle className="text-2xl font-bold text-white">
+          <ModalTitle
+            className={cn(
+              'text-2xl font-bold text-white transition-all duration-700',
+              cardGlowActive && 'text-emerald-200 drop-shadow-[0_0_10px_rgba(16,185,129,0.45)]',
+              nobleGlowActive && 'text-violet-200 drop-shadow-[0_0_10px_rgba(139,92,246,0.45)]'
+            )}
+          >
             How to Play
             <h1
-              className="text-3xl sm:text-4xl lg:text-5xl font-bold inline-block mx-2 select-none text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400"
+              className={cn(
+                'text-3xl sm:text-4xl lg:text-5xl font-bold inline-block mx-2 select-none text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400 transition-all duration-700',
+                cardGlowActive && 'from-emerald-200 via-green-300 to-emerald-400',
+                nobleGlowActive && 'from-violet-200 via-purple-300 to-violet-400'
+              )}
               style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }}
             >
               Splendor
@@ -132,8 +200,16 @@ export function HelpModal() {
                 The cost is calculated by subtracting the bonuses you have from the card's cost.
               </p>
             </div>
-            <div className="shrink-0 self-start pt-0.5 sm:pt-1">
-              <HelpModalTileFrame>
+            <div
+              className="shrink-0 self-start pt-0.5 sm:pt-1"
+              onClick={handleCardTap}
+            >
+              <HelpModalTileFrame
+                className={cn(
+                  'transition-all duration-500',
+                  cardGlowActive && 'ring-2 ring-emerald-400 shadow-[0_0_22px_rgba(16,185,129,0.45)]'
+                )}
+              >
                 <DevelopmentCardComponent card={exampleCard} />
               </HelpModalTileFrame>
             </div>
@@ -160,8 +236,16 @@ export function HelpModal() {
                 </ul>
               </section>
             </div>
-            <div className="shrink-0 self-start pt-0.5 sm:pt-1">
-              <HelpModalTileFrame>
+            <div
+              className="shrink-0 self-start pt-0.5 sm:pt-1"
+              onClick={handleNobleTap}
+            >
+              <HelpModalTileFrame
+                className={cn(
+                  'transition-all duration-500',
+                  nobleGlowActive && 'ring-2 ring-violet-400 shadow-[0_0_22px_rgba(139,92,246,0.45)]'
+                )}
+              >
                 <NobleTile noble={exampleNoble} />
               </HelpModalTileFrame>
             </div>
