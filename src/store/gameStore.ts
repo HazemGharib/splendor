@@ -8,6 +8,11 @@ import { GAME_CONSTANTS } from '../utils/constants';
 import { DevelopmentCard, GemColor } from '../models/Card';
 import { Noble } from '../models/Noble';
 import { RuleEngine } from '../services/RuleEngine';
+import {
+  clearGameProgress,
+  loadGameProgress,
+  saveGameProgress,
+} from '../services/gamePersistence';
 
 export interface NobleVisitAnnouncementPayload {
   noble: Noble;
@@ -41,10 +46,12 @@ export interface GameStore extends GameState {
   discardToken: (color: GemColor) => void;
   endTurn: () => void;
   selectNoble: (nobleId: string) => void;
+  resumeSavedGame: () => boolean;
+  hasSavedGame: () => boolean;
 }
 
 export const useGameStore = create<GameStore>()(
-  immer((set) => ({
+  immer((set, get) => ({
     phase: GamePhase.SETUP,
     playerCount: 2,
     players: [],
@@ -238,6 +245,8 @@ export const useGameStore = create<GameStore>()(
 
     initGame: (playerCount, aiCount = 0, colorOrSeatColors = PlayerColor.RED) =>
       set((state) => {
+        clearGameProgress();
+
         const gemTokenCount =
           playerCount === 2
             ? GAME_CONSTANTS.TOKENS.GEM_TOKENS_2P
@@ -513,45 +522,54 @@ export const useGameStore = create<GameStore>()(
       }),
 
     endTurn: () =>
-      set((state) => {
-        const currentPlayer = state.players[state.currentPlayerIndex];
+      {
+        set((state) => {
+          const currentPlayer = state.players[state.currentPlayerIndex];
 
-        const eligibleNobles = RuleEngine.getEligibleNobles(currentPlayer, state.nobles);
-        if (eligibleNobles.length > 0) {
-          const nobleToAward = eligibleNobles[0];
-          currentPlayer.nobles.push(nobleToAward);
-          currentPlayer.prestige += nobleToAward.prestige;
+          const eligibleNobles = RuleEngine.getEligibleNobles(currentPlayer, state.nobles);
+          if (eligibleNobles.length > 0) {
+            const nobleToAward = eligibleNobles[0];
+            currentPlayer.nobles.push(nobleToAward);
+            currentPlayer.prestige += nobleToAward.prestige;
 
-          const nobleIndex = state.nobles.findIndex((n) => n.id === nobleToAward.id);
-          if (nobleIndex >= 0) {
-            state.nobles.splice(nobleIndex, 1);
+            const nobleIndex = state.nobles.findIndex((n) => n.id === nobleToAward.id);
+            if (nobleIndex >= 0) {
+              state.nobles.splice(nobleIndex, 1);
+            }
+
+            state.nobleVisitAnnouncement = {
+              noble: {
+                ...nobleToAward,
+                requirements: { ...nobleToAward.requirements },
+              },
+              playerColor: currentPlayer.color,
+              isAI: currentPlayer.isAI,
+              at: Date.now(),
+            };
           }
 
-          state.nobleVisitAnnouncement = {
-            noble: {
-              ...nobleToAward,
-              requirements: { ...nobleToAward.requirements },
-            },
-            playerColor: currentPlayer.color,
-            isAI: currentPlayer.isAI,
-            at: Date.now(),
-          };
-        }
+          if (currentPlayer.prestige >= GAME_CONSTANTS.VICTORY.PRESTIGE_TARGET) {
+            state.phase = GamePhase.GAME_OVER;
+            state.winner = currentPlayer;
+            state.nobleVisitAnnouncement = null;
+            return;
+          }
 
-        if (currentPlayer.prestige >= GAME_CONSTANTS.VICTORY.PRESTIGE_TARGET) {
-          state.phase = GamePhase.GAME_OVER;
-          state.winner = currentPlayer;
-          state.nobleVisitAnnouncement = null;
-          return;
-        }
+          state.currentPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
+          state.hasPerformedAction = false;
 
-        state.currentPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
-        state.hasPerformedAction = false;
-        
-        if (state.currentPlayerIndex === 0) {
-          state.turnCount += 1;
+          if (state.currentPlayerIndex === 0) {
+            state.turnCount += 1;
+          }
+        });
+
+        const latest = get();
+        if (latest.phase === GamePhase.GAME_OVER) {
+          clearGameProgress();
+        } else if (latest.phase === GamePhase.PLAYING) {
+          saveGameProgress(latest);
         }
-      }),
+      },
 
     selectNoble: (nobleId) =>
       set((state) => {
@@ -571,6 +589,30 @@ export const useGameStore = create<GameStore>()(
           };
         }
       }),
+
+    resumeSavedGame: () => {
+      const saved = loadGameProgress();
+      if (!saved) return false;
+
+      set((state) => {
+        state.phase = saved.phase;
+        state.playerCount = saved.playerCount;
+        state.players = saved.players;
+        state.currentPlayerIndex = saved.currentPlayerIndex;
+        state.tokenSupply = saved.tokenSupply;
+        state.maxTokenSupply = saved.maxTokenSupply;
+        state.cardMarket = saved.cardMarket;
+        state.nobles = saved.nobles;
+        state.winner = saved.winner;
+        state.turnCount = saved.turnCount;
+        state.hasPerformedAction = saved.hasPerformedAction;
+        state.nobleVisitAnnouncement = null;
+      });
+
+      return true;
+    },
+
+    hasSavedGame: () => loadGameProgress() !== null,
   }))
 );
 

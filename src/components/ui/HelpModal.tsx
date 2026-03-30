@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import {
   Modal,
+  ModalClose,
   ModalContent,
   ModalHeader,
   ModalTitle,
@@ -68,7 +69,17 @@ export function HelpModal() {
           ❔
         </Button>
       </ModalTrigger>
-      <ModalContent className="lg:max-w-2xl max-w-sm max-h-max overflow-y-auto rounded-xl">
+      <ModalContent className="max-w-sm lg:max-w-2xl max-h-[82vh] sm:max-h-[86vh] lg:max-h-[88vh] overflow-y-auto rounded-xl">
+        <ModalClose asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Close help"
+            className="absolute right-2 top-2 text-gray-300 hover:text-white"
+          >
+            ✕
+          </Button>
+        </ModalClose>
         <ModalHeader>
           <ModalTitle className="text-2xl font-bold text-white">
             How to Play
