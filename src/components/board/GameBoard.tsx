@@ -15,6 +15,7 @@ import { NobleVisitAnnouncement } from '../ui/NobleVisitAnnouncement';
 import { GemColor } from '../../models/Card';
 import { AIService } from '../../services/AIService';
 import { useSplendorTitleDebugTap } from '../../hooks/useDebugEasterEgg';
+import { trackEvent } from '../../services/analytics/posthogClient';
 
 export function GameBoard() {
   const state = useGameStore();
@@ -80,6 +81,18 @@ export function GameBoard() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!winner) return;
+    trackEvent('game_won', {
+      component_id: 'game_board',
+      winner_color: winner.color,
+      winner_is_ai: winner.isAI,
+      winner_prestige: winner.prestige,
+      player_count: players.length,
+      turn_count: state.turnCount,
+    });
+  }, [winner, players.length, state.turnCount]);
 
   // AI turn logic - runs when it's an AI player's turn
   useEffect(() => {
@@ -151,6 +164,11 @@ export function GameBoard() {
   }, [phase, currentPlayer, hasPerformedAction, state, takeThreeTokens, takeTwoTokens, purchaseCard, reserveCard, endTurn]);
 
   const handleTakeTokens = (colors: GemColor[], isTwoSame: boolean) => {
+    trackEvent('take_tokens_confirmed', {
+      component_id: 'token_selector',
+      token_type: isTwoSame ? 'two_same' : 'three_different',
+      colors,
+    });
     if (isTwoSame) {
       takeTwoTokens(colors[0]);
     } else {
@@ -163,6 +181,11 @@ export function GameBoard() {
   };
 
   const handlePurchaseCard = (cardId: string, fromReserved?: boolean) => {
+    trackEvent('purchase_card_clicked', {
+      component_id: fromReserved ? 'reserved_cards' : 'card_market',
+      card_id: cardId,
+      from_reserved: Boolean(fromReserved),
+    });
     purchaseCard(cardId, fromReserved);
     // Auto-end turn after action
     setTimeout(() => {
@@ -171,6 +194,10 @@ export function GameBoard() {
   };
 
   const handlePurchaseReserved = (cardId: string) => {
+    trackEvent('purchase_reserved_card_clicked', {
+      component_id: 'reserved_cards',
+      card_id: cardId,
+    });
     purchaseCard(cardId, true);
     // Auto-end turn after action
     setTimeout(() => {
@@ -179,6 +206,10 @@ export function GameBoard() {
   };
 
   const handleReserveCard = (cardId: string) => {
+    trackEvent('reserve_card_clicked', {
+      component_id: 'card_market',
+      card_id: cardId,
+    });
     reserveCard(cardId);
     // Auto-end turn after action
     setTimeout(() => {

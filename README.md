@@ -60,32 +60,49 @@ npm run test:e2e
 
 The app will be available at `http://localhost:3000` (or next available port).
 
+### Analytics Environment Variables
+
+To enable PostHog analytics:
+
+```bash
+VITE_PUBLIC_POSTHOG_PROJECT_TOKEN=phc_your_project_key
+# Optional (defaults to https://us.i.posthog.com)
+VITE_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
+```
+
+Without `VITE_PUBLIC_POSTHOG_PROJECT_TOKEN`, analytics stays disabled.
+
 ## How to Play
 
 ### Goal
+
 Be the first player to reach 15 prestige points.
 
 ### Actions (choose one per turn)
+
 1. **Take 3 different gem tokens**
 2. **Take 2 tokens of the same color** (requires 4+ in supply)
 3. **Reserve a card** and take 1 gold token
 4. **Purchase a card** using tokens (bonuses reduce cost)
 
 ### Cards & Bonuses
+
 - Each card provides a permanent bonus that reduces future purchase costs
 - Cards award prestige points
 
 ### Nobles
+
 - Nobles visit automatically when you have enough bonuses
 - Each noble awards 3 prestige points
 
 ### Limits
+
 - Maximum 10 tokens per player
 - Maximum 3 reserved cards per player
 
 ## Project Structure
 
-```
+```md
 src/
 ├── assets/data/        # Game data (cards, nobles)
 ├── components/         # React components
@@ -110,6 +127,7 @@ tests/
 ## Development
 
 ### Testing
+
 Tests follow TDD approach with acceptance criteria from user stories:
 
 ```bash
@@ -124,6 +142,7 @@ npm run test:e2e
 ```
 
 ### Code Quality
+
 - TypeScript strict mode enabled
 - ESLint + Prettier configured
 - 80% code coverage target
@@ -144,6 +163,7 @@ npm run type-check   # TypeScript type checking
 ## Game Data
 
 Card and noble data is located in `src/assets/data/`:
+
 - `cards-level1.json` - 40 level 1 cards
 - `cards-level2.json` - 30 level 2 cards
 - `cards-level3.json` - 20 level 3 cards

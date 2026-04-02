@@ -13,6 +13,7 @@ import {
   applyMusicEnabledPreference,
   primeAudioFromUserGesture,
 } from '../../audio/splendorSoundtrackPlayer';
+import { trackEvent } from '../../services/analytics/posthogClient';
 
 export function SettingsModal() {
   const [open, setOpen] = useState(false);
@@ -22,7 +23,12 @@ export function SettingsModal() {
   return (
     <Modal open={open} onOpenChange={setOpen}>
       <ModalTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Settings">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Settings"
+          onClick={() => trackEvent('settings_opened', { component_id: 'settings_modal' })}
+        >
           ⚙️
         </Button>
       </ModalTrigger>

@@ -7,6 +7,7 @@ import {
   ModalFooter,
 } from '../design-system/Modal';
 import { Button } from '../design-system/Button';
+import { trackEvent } from '../../services/analytics/posthogClient';
 
 interface WinnerModalProps {
   winner: PlayerState;
@@ -14,6 +15,11 @@ interface WinnerModalProps {
 
 export function WinnerModal({ winner }: WinnerModalProps) {
   const handleRestart = () => {
+    trackEvent('play_again_clicked', {
+      component_id: 'winner_modal',
+      winner_color: winner.color,
+      winner_is_ai: winner.isAI,
+    });
     window.location.reload();
   };
 
