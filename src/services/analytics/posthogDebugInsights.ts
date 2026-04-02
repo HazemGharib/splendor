@@ -8,6 +8,7 @@ export interface UsersByRegionInsight {
   rows: Array<{
     country: string;
     region: string;
+    city: string;
     uniqueUsers: number;
   }>;
   fromCache: boolean;
@@ -15,7 +16,7 @@ export interface UsersByRegionInsight {
 }
 
 const UNIQUE_VISITORS_CACHE_KEY = 'splendor_debug_unique_visitors_30d';
-const USERS_BY_REGION_CACHE_KEY = 'splendor_debug_users_by_region_30d';
+const USERS_BY_REGION_CACHE_KEY = 'splendor_debug_users_by_region_city_30d_v2';
 const UNIQUE_VISITORS_CACHE_TTL_MS = 5 * 60 * 1000;
 
 interface UniqueVisitorsCacheRecord {
@@ -141,7 +142,7 @@ export async function fetchUniqueVisitorsLast30Days(): Promise<UniqueVisitorsIns
   return { ...record, fromCache: false };
 }
 
-export async function fetchUsersByCountryRegionLast30Days(): Promise<UsersByRegionInsight> {
+export async function fetchUsersByCountryRegionCityLast30Days(): Promise<UsersByRegionInsight> {
   const cache = readUsersByRegionCache();
   const now = Date.now();
   if (cache && now - cache.fetchedAt < UNIQUE_VISITORS_CACHE_TTL_MS) {
@@ -172,12 +173,13 @@ export async function fetchUsersByCountryRegionLast30Days(): Promise<UsersByRegi
         query: `SELECT
   coalesce(nullIf(properties['$geoip_country_name'], ''), 'Unknown') AS country,
   coalesce(nullIf(properties['$geoip_subdivision_1_name'], ''), 'Unknown') AS region,
+  coalesce(nullIf(properties['$geoip_city_name'], ''), 'Unknown') AS city,
   count(DISTINCT person_id) AS unique_users
 FROM events
 WHERE timestamp >= now() - INTERVAL 30 DAY
-GROUP BY country, region
+GROUP BY country, region, city
 ORDER BY unique_users DESC
-LIMIT 20`,
+LIMIT 100`,
       },
     }),
   });
@@ -198,18 +200,21 @@ LIMIT 20`,
 
   const countryIdx = col('country', 0);
   const regionIdx = col('region', 1);
-  const usersIdx = col('unique_users', 2);
+  const cityIdx = col('city', 2);
+  const usersIdx = col('unique_users', 3);
 
   const rows = (data.results ?? []).map((row) => {
     if (Array.isArray(row)) {
       const country = String(row[countryIdx] ?? 'Unknown');
       const region = String(row[regionIdx] ?? 'Unknown');
+      const city = String(row[cityIdx] ?? 'Unknown');
       const uniqueUsersRaw = row[usersIdx];
       const uniqueUsers =
         typeof uniqueUsersRaw === 'number' ? uniqueUsersRaw : Number(uniqueUsersRaw ?? 0);
       return {
         country,
         region,
+        city,
         uniqueUsers: Number.isFinite(uniqueUsers) ? uniqueUsers : 0,
       };
     }
@@ -221,6 +226,7 @@ LIMIT 20`,
     return {
       country: String(record.country ?? 'Unknown'),
       region: String(record.region ?? 'Unknown'),
+      city: String(record.city ?? 'Unknown'),
       uniqueUsers: Number.isFinite(uniqueUsers) ? uniqueUsers : 0,
     };
   });
