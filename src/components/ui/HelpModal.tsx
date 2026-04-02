@@ -13,6 +13,7 @@ import { DevelopmentCard, GemColor } from '../../models/Card';
 import { NobleTile } from '../game/Noble/NobleTile';
 import { Noble } from '../../models/Noble';
 import { cn } from '../../utils/cn';
+import { trackEvent } from '../../services/analytics/posthogClient';
 
 /** Dev cards & nobles are built as w-44 × h-60 (11∶15). Scale uniformly inside a fixed-aspect frame. */
 function HelpModalTileFrame({
@@ -123,7 +124,12 @@ export function HelpModal() {
   return (
     <Modal open={open} onOpenChange={setOpen}>
       <ModalTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Help">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Help"
+          onClick={() => trackEvent('help_opened', { component_id: 'help_modal' })}
+        >
           ❔
         </Button>
       </ModalTrigger>

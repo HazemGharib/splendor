@@ -4,6 +4,7 @@ import { useSplendorTitleDebugTap } from '../../hooks/useDebugEasterEgg';
 import { PlayerColor, assignPlayerColors } from '../../models/Player';
 import { cn } from '../../utils/cn';
 import { primeAudioFromUserGesture } from '../../audio/splendorSoundtrackPlayer';
+import { trackEvent } from '../../services/analytics/posthogClient';
 
 interface GameSetupProps {
   onStart: (
@@ -136,6 +137,7 @@ export function GameSetup({
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                       <Button
                         onClick={() => {
+                          trackEvent('setup_continue_clicked', { component_id: 'setup_screen' });
                           primeAudioFromUserGesture();
                           onContinueSavedGame?.();
                         }}
@@ -147,7 +149,10 @@ export function GameSetup({
                       </Button>
                       <Button
                         variant="secondary"
-                        onClick={() => setShowResumePrompt(false)}
+                        onClick={() => {
+                          trackEvent('setup_new_game_clicked', { component_id: 'setup_screen' });
+                          setShowResumePrompt(false);
+                        }}
                         size="lg"
                         className="w-full text-lg"
                         style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }}
@@ -245,6 +250,14 @@ export function GameSetup({
 
                 <Button
                   onClick={() => {
+                    trackEvent('setup_start_clicked', {
+                      component_id: 'setup_screen',
+                      player_count: selectedCount,
+                      mode: playAgainstAI ? 'vs_ai' : 'pass_and_play',
+                      ai_count: playAgainstAI ? selectedCount - 1 : 0,
+                      human_color: playAgainstAI ? yourColor : undefined,
+                      seat_colors: playAgainstAI ? undefined : seatColors,
+                    });
                     primeAudioFromUserGesture();
                     onStart(
                       selectedCount,

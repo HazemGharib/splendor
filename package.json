@@ -22,6 +22,7 @@
     "clsx": "^2.1.1",
     "immer": "^11.1.4",
     "postcss": "^8.5.8",
+    "posthog-js": "^1.364.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tailwind-merge": "^3.5.0",
