@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { DataLoader } from '../../services/DataLoader';
 import { CardBonus, DevelopmentCard, GemColor } from '../../models/Card';
@@ -185,7 +185,7 @@ export function DebugPanel() {
   const [uniqueVisitorsError, setUniqueVisitorsError] = useState<string | null>(null);
   const [uniqueVisitorsFetchedAt, setUniqueVisitorsFetchedAt] = useState<number | null>(null);
   const [usersByRegion, setUsersByRegion] = useState<
-    Array<{ country: string; region: string; uniqueUsers: number }>
+    Array<{ country: string; region: string; city: string; uniqueUsers: number }>
   >([]);
   const [usersByRegionError, setUsersByRegionError] = useState<string | null>(null);
   const dismissAllowedAfterRef = useRef(0);
@@ -227,7 +227,7 @@ export function DebugPanel() {
         const mod = await import('../../services/analytics/posthogDebugInsights');
         const [uniqueResult, byRegionResult] = await Promise.all([
           mod.fetchUniqueVisitorsLast30Days(),
-          mod.fetchUsersByCountryRegionLast30Days(),
+          mod.fetchUsersByCountryRegionCityLast30Days(),
         ]);
         if (cancelled) return;
         setUniqueVisitors30d(uniqueResult.count);
@@ -247,6 +247,36 @@ export function DebugPanel() {
       cancelled = true;
     };
   }, [debugMode]);
+
+  const countriesSorted = useMemo(() => {
+    const byCountry = new Map<string, Map<string, Array<{ city: string; uniqueUsers: number }>>>();
+
+    for (const row of usersByRegion) {
+      const { country, region, city, uniqueUsers } = row;
+      const cityLabel = city || 'Unknown';
+      if (!byCountry.has(country)) {
+        byCountry.set(country, new Map());
+      }
+      const regionMap = byCountry.get(country)!;
+      if (!regionMap.has(region)) {
+        regionMap.set(region, []);
+      }
+      regionMap.get(region)!.push({ city: cityLabel, uniqueUsers });
+    }
+
+    return Array.from(byCountry.entries())
+      .map(([country, regionMap]) => {
+        const regions = Array.from(regionMap.entries()).map(([region, cities]) => {
+          const totalUsers = cities.reduce((sum, c) => sum + c.uniqueUsers, 0);
+          const citiesSorted = [...cities].sort((a, b) => b.uniqueUsers - a.uniqueUsers);
+          return { region, cities: citiesSorted, totalUsers };
+        });
+        regions.sort((a, b) => b.totalUsers - a.totalUsers);
+        const totalUsers = regions.reduce((sum, r) => sum + r.totalUsers, 0);
+        return { country, regions, totalUsers };
+      })
+      .sort((a, b) => b.totalUsers - a.totalUsers);
+  }, [usersByRegion]);
 
   const dismissCheeseOverlay = () => {
     try {
@@ -297,25 +327,6 @@ export function DebugPanel() {
     if (Date.now() < dismissAllowedAfterRef.current) return;
     toggleDebugMode();
   };
-
-  const usersByCountry = usersByRegion.reduce<Record<string, Array<{ region: string; uniqueUsers: number }>>>(
-    (acc, row) => {
-      if (!acc[row.country]) {
-        acc[row.country] = [];
-      }
-      acc[row.country].push({ region: row.region, uniqueUsers: row.uniqueUsers });
-      return acc;
-    },
-    {}
-  );
-
-  const countriesSorted = Object.entries(usersByCountry)
-    .map(([country, regions]) => ({
-      country,
-      regions,
-      totalUsers: regions.reduce((sum, region) => sum + region.uniqueUsers, 0),
-    }))
-    .sort((a, b) => b.totalUsers - a.totalUsers);
 
   return (
     <>
@@ -422,7 +433,7 @@ export function DebugPanel() {
 
           <div className="mt-3">
             <div className="text-[11px] uppercase tracking-wide text-emerald-200/80">
-              Users by country/region (last 30 days)
+              Users by country / region / city (last 30 days)
             </div>
             {uniqueVisitorsLoading ? (
               <div className="mt-1 text-[11px] text-gray-300">Loading breakdown...</div>
@@ -451,20 +462,41 @@ export function DebugPanel() {
                       Click to expand
                     </div>
                     <div className="border-t border-white/10">
-                      {regions
-                        .slice()
-                        .sort((a, b) => b.uniqueUsers - a.uniqueUsers)
-                        .map((region) => (
-                          <div
-                            key={`${country}-${region.region}`}
-                            className="flex items-center justify-between px-2 py-1 text-[11px] border-b border-white/5 last:border-b-0"
-                          >
-                            <span className="text-gray-300 truncate pr-2">{region.region}</span>
-                            <span className="text-white font-semibold tabular-nums">
-                              {region.uniqueUsers}
-                            </span>
+                      {regions.map((regionBlock) => (
+                        <details
+                          key={`${country}-${regionBlock.region}`}
+                          className="group/region border-b border-white/5 last:border-b-0"
+                        >
+                          <summary className="flex items-center justify-between cursor-pointer list-none pl-3 pr-2 py-1.5 text-[11px] hover:bg-white/5 transition-colors">
+                            <div className="flex items-center min-w-0 pr-2">
+                              <span className="text-gray-500 mr-1 group-open/region:hidden">▶</span>
+                              <span className="text-gray-500 mr-1 hidden group-open/region:inline">▼</span>
+                              <span className="text-gray-300 font-medium truncate">{regionBlock.region}</span>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="text-[10px] text-gray-500 hidden sm:inline">
+                                {regionBlock.cities.length} cit{regionBlock.cities.length === 1 ? 'y' : 'ies'}
+                              </span>
+                              <span className="text-white font-semibold tabular-nums">
+                                {regionBlock.totalUsers}
+                              </span>
+                            </div>
+                          </summary>
+                          <div className="border-t border-white/5 bg-black/15 pl-5 pr-2 pb-1">
+                            {regionBlock.cities.map((cityRow) => (
+                              <div
+                                key={`${country}-${regionBlock.region}-${cityRow.city}`}
+                                className="flex items-center justify-between py-1 text-[10px] border-b border-white/5 last:border-b-0"
+                              >
+                                <span className="text-gray-400 truncate pr-2">{cityRow.city}</span>
+                                <span className="text-gray-100 font-semibold tabular-nums">
+                                  {cityRow.uniqueUsers}
+                                </span>
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        </details>
+                      ))}
                     </div>
                   </details>
                 ))}
