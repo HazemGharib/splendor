@@ -184,6 +184,10 @@ export function DebugPanel() {
   const [uniqueVisitorsLoading, setUniqueVisitorsLoading] = useState(false);
   const [uniqueVisitorsError, setUniqueVisitorsError] = useState<string | null>(null);
   const [uniqueVisitorsFetchedAt, setUniqueVisitorsFetchedAt] = useState<number | null>(null);
+  const [usersByRegion, setUsersByRegion] = useState<
+    Array<{ country: string; region: string; uniqueUsers: number }>
+  >([]);
+  const [usersByRegionError, setUsersByRegionError] = useState<string | null>(null);
   const dismissAllowedAfterRef = useRef(0);
 
   const currentPlayer = players[currentPlayerIndex];
@@ -213,6 +217,7 @@ export function DebugPanel() {
       if (!cancelled) {
         setUniqueVisitorsLoading(true);
         setUniqueVisitorsError(null);
+        setUsersByRegionError(null);
       }
     });
 
@@ -220,14 +225,19 @@ export function DebugPanel() {
       try {
         if (!import.meta.env.DEV) return;
         const mod = await import('../../services/analytics/posthogDebugInsights');
-        const result = await mod.fetchUniqueVisitorsLast30Days();
+        const [uniqueResult, byRegionResult] = await Promise.all([
+          mod.fetchUniqueVisitorsLast30Days(),
+          mod.fetchUsersByCountryRegionLast30Days(),
+        ]);
         if (cancelled) return;
-        setUniqueVisitors30d(result.count);
-        setUniqueVisitorsFetchedAt(result.fetchedAt);
+        setUniqueVisitors30d(uniqueResult.count);
+        setUniqueVisitorsFetchedAt(uniqueResult.fetchedAt);
+        setUsersByRegion(byRegionResult.rows);
       } catch (error: unknown) {
         if (cancelled) return;
         const message = error instanceof Error ? error.message : 'Unable to load unique visitors insight.';
         setUniqueVisitorsError(message);
+        setUsersByRegionError(message);
       } finally {
         if (!cancelled) setUniqueVisitorsLoading(false);
       }
@@ -287,6 +297,25 @@ export function DebugPanel() {
     if (Date.now() < dismissAllowedAfterRef.current) return;
     toggleDebugMode();
   };
+
+  const usersByCountry = usersByRegion.reduce<Record<string, Array<{ region: string; uniqueUsers: number }>>>(
+    (acc, row) => {
+      if (!acc[row.country]) {
+        acc[row.country] = [];
+      }
+      acc[row.country].push({ region: row.region, uniqueUsers: row.uniqueUsers });
+      return acc;
+    },
+    {}
+  );
+
+  const countriesSorted = Object.entries(usersByCountry)
+    .map(([country, regions]) => ({
+      country,
+      regions,
+      totalUsers: regions.reduce((sum, region) => sum + region.uniqueUsers, 0),
+    }))
+    .sort((a, b) => b.totalUsers - a.totalUsers);
 
   return (
     <>
@@ -390,6 +419,58 @@ export function DebugPanel() {
               {uniqueVisitorsError}
             </div>
           )}
+
+          <div className="mt-3">
+            <div className="text-[11px] uppercase tracking-wide text-emerald-200/80">
+              Users by country/region (last 30 days)
+            </div>
+            {uniqueVisitorsLoading ? (
+              <div className="mt-1 text-[11px] text-gray-300">Loading breakdown...</div>
+            ) : usersByRegionError ? (
+              <div className="mt-1 text-[11px] text-amber-300">{usersByRegionError}</div>
+            ) : usersByRegion.length === 0 ? (
+              <div className="mt-1 text-[11px] text-gray-300">No data yet.</div>
+            ) : (
+              <div className="mt-2 max-h-44 overflow-y-auto rounded border border-emerald-500/20 bg-black/20 p-1">
+                {countriesSorted.map(({ country, regions, totalUsers }) => (
+                  <details key={country} className="group rounded border border-white/10 mb-1 last:mb-0">
+                    <summary className="flex items-center justify-between cursor-pointer list-none px-2 py-1.5 text-[11px] hover:bg-white/5 transition-colors">
+                      <div className="flex items-center min-w-0 pr-2">
+                        <span className="text-gray-400 mr-1.5 group-open:hidden">▶</span>
+                        <span className="text-gray-400 mr-1.5 hidden group-open:inline">▼</span>
+                        <span className="text-gray-100 font-semibold truncate">{country}</span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-[10px] text-gray-400 hidden sm:inline">
+                          {regions.length} region{regions.length === 1 ? '' : 's'}
+                        </span>
+                        <span className="text-emerald-200 font-bold tabular-nums">{totalUsers}</span>
+                      </div>
+                    </summary>
+                    <div className="px-2 pb-1 text-[10px] text-gray-500 group-open:hidden">
+                      Click to expand
+                    </div>
+                    <div className="border-t border-white/10">
+                      {regions
+                        .slice()
+                        .sort((a, b) => b.uniqueUsers - a.uniqueUsers)
+                        .map((region) => (
+                          <div
+                            key={`${country}-${region.region}`}
+                            className="flex items-center justify-between px-2 py-1 text-[11px] border-b border-white/5 last:border-b-0"
+                          >
+                            <span className="text-gray-300 truncate pr-2">{region.region}</span>
+                            <span className="text-white font-semibold tabular-nums">
+                              {region.uniqueUsers}
+                            </span>
+                          </div>
+                        ))}
+                    </div>
+                  </details>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {selectedTab === 'tokens' && (
