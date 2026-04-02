@@ -7,6 +7,24 @@ const USER_ID_KEY = 'splendor_analytics_user_id';
 
 let initialized = false;
 
+function disableToolbarInProduction(): void {
+  if (!isBrowser() || import.meta.env.DEV) return;
+
+  try {
+    window.sessionStorage.removeItem('toolbarParams');
+    window.sessionStorage.removeItem('ph_toolbar_state');
+  } catch {
+    // ignore storage failures
+  }
+
+  const win = window as Window & {
+    ph_load_toolbar?: unknown;
+    ph_toolbar_state?: unknown;
+  };
+  win.ph_load_toolbar = undefined;
+  win.ph_toolbar_state = undefined;
+}
+
 function isBrowser(): boolean {
   return typeof window !== 'undefined';
 }
@@ -63,6 +81,7 @@ export function initAnalytics(): void {
   if (!apiKey) return;
 
   const apiHost = import.meta.env.VITE_PUBLIC_POSTHOG_HOST ?? 'https://us.i.posthog.com';
+  disableToolbarInProduction();
 
   posthog.init(apiKey, {
     api_host: apiHost,
@@ -70,6 +89,7 @@ export function initAnalytics(): void {
     opt_out_capturing_persistence_type: 'localStorage',
     capture_pageview: true,
     capture_pageleave: true,
+    advanced_disable_toolbar_metrics: !import.meta.env.DEV,
     persistence: 'localStorage+cookie',
   });
 
