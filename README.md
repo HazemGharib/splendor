@@ -72,6 +72,14 @@ VITE_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
 
 Without `VITE_PUBLIC_POSTHOG_PROJECT_TOKEN`, analytics stays disabled.
 
+Optional debug-only insight variables (for the Debug Mode "Unique visitors (30d)" card):
+
+```bash
+# Debug mode only (development). Do NOT ship this token to production.
+VITE_POSTHOG_PROJECT_ID=12345
+VITE_POSTHOG_PERSONAL_API_KEY=phx_personal_api_key
+```
+
 ## How to Play
 
 ### Goal

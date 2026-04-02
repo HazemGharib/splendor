@@ -180,6 +180,10 @@ export function DebugPanel() {
   const [cardsSubTab, setCardsSubTab] = useState<'hand' | 'picker'>('hand');
   const [pendingBoardReplaceId, setPendingBoardReplaceId] = useState<string | null>(null);
   const [showCheeseOverlay, setShowCheeseOverlay] = useState(false);
+  const [uniqueVisitors30d, setUniqueVisitors30d] = useState<number | null>(null);
+  const [uniqueVisitorsLoading, setUniqueVisitorsLoading] = useState(false);
+  const [uniqueVisitorsError, setUniqueVisitorsError] = useState<string | null>(null);
+  const [uniqueVisitorsFetchedAt, setUniqueVisitorsFetchedAt] = useState<number | null>(null);
   const dismissAllowedAfterRef = useRef(0);
 
   const currentPlayer = players[currentPlayerIndex];
@@ -199,6 +203,39 @@ export function DebugPanel() {
     } catch {
       queueMicrotask(() => setShowCheeseOverlay(true));
     }
+  }, [debugMode]);
+
+  useEffect(() => {
+    if (!debugMode) return;
+
+    let cancelled = false;
+    Promise.resolve().then(() => {
+      if (!cancelled) {
+        setUniqueVisitorsLoading(true);
+        setUniqueVisitorsError(null);
+      }
+    });
+
+    (async () => {
+      try {
+        if (!import.meta.env.DEV) return;
+        const mod = await import('../../services/analytics/posthogDebugInsights');
+        const result = await mod.fetchUniqueVisitorsLast30Days();
+        if (cancelled) return;
+        setUniqueVisitors30d(result.count);
+        setUniqueVisitorsFetchedAt(result.fetchedAt);
+      } catch (error: unknown) {
+        if (cancelled) return;
+        const message = error instanceof Error ? error.message : 'Unable to load unique visitors insight.';
+        setUniqueVisitorsError(message);
+      } finally {
+        if (!cancelled) setUniqueVisitorsLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [debugMode]);
 
   const dismissCheeseOverlay = () => {
@@ -333,6 +370,28 @@ export function DebugPanel() {
 
       {/* Content */}
       <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="mb-3 rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-3">
+          <div className="text-xs uppercase tracking-wide text-emerald-300 font-semibold">
+            Analytics Insight (PostHog)
+          </div>
+          <div className="mt-1 text-sm text-white">
+            Unique visitors (last 30 days):{' '}
+            <span className="font-bold">
+              {uniqueVisitorsLoading ? 'Loading...' : uniqueVisitors30d ?? 'N/A'}
+            </span>
+          </div>
+          {uniqueVisitorsFetchedAt && !uniqueVisitorsLoading && !uniqueVisitorsError && (
+            <div className="mt-1 text-[11px] text-emerald-200/80">
+              Updated {new Date(uniqueVisitorsFetchedAt).toLocaleString()}
+            </div>
+          )}
+          {uniqueVisitorsError && (
+            <div className="mt-1 text-[11px] text-amber-300">
+              {uniqueVisitorsError}
+            </div>
+          )}
+        </div>
+
         {selectedTab === 'tokens' && (
           <div className="space-y-4">
             <div className="text-sm text-gray-300 mb-2">
