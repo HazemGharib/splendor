@@ -170,39 +170,39 @@ export function GameSetup({
                     <label className="block text-xs font-medium text-gray-400 mb-1.5">Players</label>
                     <div className="grid grid-cols-3 gap-1.5">
                       {([2, 3, 4] as const).map((count) => (
-                        <button
+                        <Button
                           key={count}
-                          type="button"
+                          variant={selectedCount === count ? 'theme' : 'themeOutline'}
                           onClick={() => setPlayerCount(count)}
                           className={cn(
                             'py-2 rounded-lg text-sm font-semibold transition-colors touch-manipulation min-h-[44px]',
                             selectedCount === count
-                              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/40'
-                              : 'bg-white/10 text-gray-200 hover:bg-white/20 border border-white/15'
+                              ? 'text-white shadow-md shadow-amber-600/40'
+                              : 'text-gray-200 hover:bg-white/20 border border-white/15'
                           )}
                         >
                           {count}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   </div>
                   <div className="flex-1 min-w-0 sm:max-w-[200px]">
                     <label className="block text-xs font-medium text-gray-400 mb-1.5">Mode</label>
-                    <button
-                      type="button"
+                    <Button
+                      variant='theme'
                       onClick={togglePlayAgainstAI}
                       className={cn(
                         'w-full py-2 px-3 rounded-lg text-sm font-semibold transition-all touch-manipulation min-h-[44px] flex items-center justify-between gap-2',
                         playAgainstAI
-                          ? 'bg-purple-600 text-white shadow-md shadow-purple-600/40'
-                          : 'bg-white/10 text-gray-200 hover:bg-white/20 border border-white/15'
+                          ? 'text-white shadow-md shadow-amber-600/40'
+                          : 'text-gray-200 hover:bg-white/20 border border-white/15'
                       )}
                     >
                       <span className="truncate">{playAgainstAI ? 'vs AI' : 'Pass & play'}</span>
                       <div
                         className={cn(
                           'w-10 h-5 shrink-0 rounded-full relative transition-colors',
-                          playAgainstAI ? 'bg-purple-400' : 'bg-white/30'
+                          playAgainstAI ? 'bg-amber-600' : 'bg-white/30'
                         )}
                       >
                         <div
@@ -212,7 +212,7 @@ export function GameSetup({
                           )}
                         />
                       </div>
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
@@ -266,6 +266,7 @@ export function GameSetup({
                     );
                   }}
                   className="w-full shadow-lg"
+                  variant="theme"
                   size="lg"
                 >
                   Start Game

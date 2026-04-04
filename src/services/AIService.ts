@@ -3,6 +3,7 @@ import { DevelopmentCard, GemColor } from '../models/Card';
 import { PlayerState, TokenInventory, BonusInventory } from '../models/Player';
 import { Noble } from '../models/Noble';
 import { RuleEngine } from './RuleEngine';
+import { GAME_CONSTANTS } from '../utils/constants';
 
 interface AIMove {
   type: 'TAKE_TWO' | 'TAKE_THREE' | 'PURCHASE' | 'RESERVE';
@@ -232,14 +233,14 @@ export class AIService {
   ): { move: AIMove; score: number }[] {
     const moves: { move: AIMove; score: number }[] = [];
     
-    // Only reserve if we have room (max 3 reserved cards)
-    if (player.reservedCards.length >= 3) {
+    if (player.reservedCards.length >= GAME_CONSTANTS.PLAYER.MAX_RESERVED_CARDS) {
       return moves;
     }
     
     // Check if reserving would exceed 10 tokens (if gold token would be awarded)
     const totalTokens = RuleEngine.getTotalTokenCount(player.tokens);
-    const willGetGoldToken = state.tokenSupply.gold > 0 && player.tokens.gold < 5;
+    const willGetGoldToken =
+      state.tokenSupply.gold > 0 && player.tokens.gold < GAME_CONSTANTS.TOKENS.GOLD_TOKENS;
     
     if (willGetGoldToken && totalTokens + 1 > 10) {
       return moves;

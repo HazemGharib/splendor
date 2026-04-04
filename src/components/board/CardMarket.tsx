@@ -6,13 +6,23 @@ interface CardMarketProps {
   market: CardMarketType;
   onCardClick?: (cardId: string) => void;
   onReserve?: (cardId: string) => void;
+  reservedCardCount?: number;
   playerTokens?: import('../../models/Player').TokenInventory;
   playerBonuses?: import('../../models/Player').BonusInventory;
   tokenSupply?: TokenSupply;
   disabled?: boolean;
 }
 
-export function CardMarket({ market, onCardClick, onReserve, playerTokens, playerBonuses, tokenSupply, disabled }: CardMarketProps) {
+export function CardMarket({
+  market,
+  onCardClick,
+  onReserve,
+  reservedCardCount,
+  playerTokens,
+  playerBonuses,
+  tokenSupply,
+  disabled,
+}: CardMarketProps) {
   return (
     <div className="bg-gray-900 p-3 sm:p-4 rounded-lg w-full">
       <h2 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3">Card Market</h2>
@@ -23,6 +33,7 @@ export function CardMarket({ market, onCardClick, onReserve, playerTokens, playe
           deckCount={market.level3.deck.length}
           onCardClick={onCardClick}
           onReserve={onReserve}
+          reservedCardCount={reservedCardCount}
           playerTokens={playerTokens}
           playerBonuses={playerBonuses}
           tokenSupply={tokenSupply}
@@ -35,6 +46,7 @@ export function CardMarket({ market, onCardClick, onReserve, playerTokens, playe
           deckCount={market.level2.deck.length}
           onCardClick={onCardClick}
           onReserve={onReserve}
+          reservedCardCount={reservedCardCount}
           playerTokens={playerTokens}
           playerBonuses={playerBonuses}
           tokenSupply={tokenSupply}
@@ -47,6 +59,7 @@ export function CardMarket({ market, onCardClick, onReserve, playerTokens, playe
           deckCount={market.level1.deck.length}
           onCardClick={onCardClick}
           onReserve={onReserve}
+          reservedCardCount={reservedCardCount}
           playerTokens={playerTokens}
           playerBonuses={playerBonuses}
           tokenSupply={tokenSupply}

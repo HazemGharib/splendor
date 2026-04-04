@@ -11,6 +11,8 @@ interface DevelopmentCardProps {
   disabled?: boolean;
   showReserveOption?: boolean;
   onReserve?: () => void;
+  /** When reserve is shown but not allowed (e.g. 3 reserved or token cap). */
+  reserveUnavailableLabel?: string;
 }
 
 const levelColors = {
@@ -25,6 +27,7 @@ export function DevelopmentCardComponent({
   disabled,
   showReserveOption = false,
   onReserve,
+  reserveUnavailableLabel,
 }: DevelopmentCardProps) {
   const backgroundUrl = getCardBackground(card.level, card.bonus);
   
@@ -60,21 +63,22 @@ export function DevelopmentCardComponent({
             <CardCost cost={card.cost} />
           </div>
           
-          {showReserveOption && onReserve && (
+          {showReserveOption && (onReserve || reserveUnavailableLabel) && (
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                onReserve();
+                onReserve?.();
               }}
-              disabled={disabled}
+              disabled={disabled || !onReserve}
               className={cn(
-                "mt-2 text-xs px-2 py-1 rounded transition-colors w-full min-h-[32px] touch-manipulation",
-                disabled 
-                  ? "bg-gray-800 text-gray-600 cursor-not-allowed"
-                  : "bg-gray-700 hover:bg-gray-600 active:bg-gray-500 text-white"
+                'mt-2 text-xs px-2 py-1 rounded transition-colors w-full min-h-[32px] touch-manipulation',
+                disabled || !onReserve
+                  ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                  : 'bg-gray-700 hover:bg-gray-600 active:bg-gray-500 text-white'
               )}
             >
-              Reserve
+              {onReserve ? 'Reserve' : reserveUnavailableLabel}
             </button>
           )}
         </div>

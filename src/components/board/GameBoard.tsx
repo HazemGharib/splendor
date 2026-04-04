@@ -206,12 +206,12 @@ export function GameBoard() {
   };
 
   const handleReserveCard = (cardId: string) => {
+    const ok = reserveCard(cardId);
+    if (!ok) return;
     trackEvent('reserve_card_clicked', {
       component_id: 'card_market',
       card_id: cardId,
     });
-    reserveCard(cardId);
-    // Auto-end turn after action
     setTimeout(() => {
       endTurn();
     }, 500);
@@ -274,6 +274,7 @@ export function GameBoard() {
             market={cardMarket}
             onCardClick={handlePurchaseCard}
             onReserve={handleReserveCard}
+            reservedCardCount={currentPlayer?.reservedCards.length ?? 0}
             playerTokens={currentPlayer?.tokens}
             playerBonuses={currentPlayer?.bonuses}
             tokenSupply={tokenSupply}
