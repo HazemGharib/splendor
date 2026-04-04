@@ -10,7 +10,8 @@
     "test:e2e": "playwright test",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 2",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "icons:round": "node scripts/round-public-icons.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -51,6 +52,7 @@
     "globals": "^17.4.0",
     "jsdom": "^27.0.1",
     "prettier": "^3.8.1",
+    "sharp": "^0.34.5",
     "typescript": "5.3",
     "typescript-eslint": "^8.57.2",
     "vite": "^5.1.0",

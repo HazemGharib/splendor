@@ -29,15 +29,15 @@ export function TurnIndicator({ currentPlayer, hasPerformedAction, isAIThinking 
         {currentPlayer.isAI && isAIThinking && (
           <div className="flex items-center gap-2">
             <div className="flex gap-1">
-              <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-              <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-              <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
-            <p className="text-xs sm:text-sm text-purple-400 italic">AI is thinking...</p>
+            <p className="text-xs sm:text-sm text-amber-400 italic">AI is thinking...</p>
           </div>
         )}
         {!currentPlayer.isAI && !hasPerformedAction && (
-          <p className="text-xs sm:text-sm text-yellow-400 italic">Choose an action...</p>
+          <p className="text-xs sm:text-sm text-yellow-400 italic">Your turn...</p>
         )}
         {!currentPlayer.isAI && hasPerformedAction && (
           <p className="text-xs sm:text-sm text-green-400 italic">Turn ending...</p>

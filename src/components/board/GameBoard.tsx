@@ -120,8 +120,8 @@ export function GameBoard() {
       setIsAIThinking(true);
     });
     
-    // Simulate AI thinking time (2-3 seconds)
-    const thinkingTime = 2000 + Math.random() * 1000;
+    // Simulate AI thinking time (2 seconds)
+    const thinkingTime = 1000 + (Math.random() * 500);
     
     const timeoutId = setTimeout(async () => {
       const move = await AIService.makeMove(state);
