@@ -196,28 +196,23 @@ export function TokenSelector({ supply, playerTokens, onTakeTokens, disabled }: 
         </Button>
         <Button 
           onClick={handleConfirm} 
-          variant="default" 
+          variant="theme" 
           disabled={effectivelyDisabled || !isValid || isCollecting} 
-          className="flex-1 font-semibold bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800" 
+          className="flex-1 font-semibold" 
           size="sm"
         >
           <span className="hidden sm:inline">Confirm</span>
           <span className="sm:hidden">✓</span>
-          {isValid && <span className="ml-1 text-xs opacity-90">{canTakeTwoSame() ? '(×2)' : '(×3)'}</span>}
+          {isValid && <span className="ml-1 text-xs opacity-90">{canTakeTwoSame() ? '(x2)' : '(x3)'}</span>}
         </Button>
       </div>
 
-      <div className="text-xs space-y-1.5 bg-gray-900/60 p-3 rounded-lg border border-gray-700/30">
-        <p className="text-gray-300 font-medium">📋 Rules:</p>
-        <p className="text-gray-400">• Take 2 same (need 4+ supply)</p>
-        <p className="text-gray-400">• Take 3 different colors</p>
-        {selectedTokens.length > 0 && !isValid && (
-          <p className="text-yellow-300 mt-2 font-medium flex items-center gap-1">
-            <span>⚠️</span>
-            {getValidationError()}
-          </p>
-        )}
-      </div>
+      {selectedTokens.length > 0 && !isValid && (
+        <div className="text-xs px-3 py-2 bg-yellow-700/30 backdrop-blur-sm border border-yellow-200/30 rounded-lg text-yellow-200 flex items-center gap-2">
+          <span className="text-lg">⚠️</span>
+          <span>{getValidationError()}</span>
+        </div>
+      )}
     </div>
   );
 }
