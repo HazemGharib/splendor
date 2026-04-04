@@ -7,11 +7,17 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800',
-        secondary: 'bg-gray-700 text-white hover:bg-gray-800 active:bg-gray-900',
-        outline: 'border border-gray-600 bg-transparent hover:bg-gray-800 active:bg-gray-900',
-        ghost: 'hover:bg-gray-800 active:bg-gray-900',
-        destructive: 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800',
+        theme: 'bg-amber-500 text-white hover:bg-amber-600 active:bg-amber-700 text-white',
+        themeOutline: 'border border-amber-500 bg-transparent hover:bg-amber-600 active:bg-amber-700 text-white',
+        themeGhost: 'hover:bg-amber-600 active:bg-amber-700 text-white',
+        accent: 'bg-green-500 text-white hover:bg-green-600 active:bg-green-700 text-white',
+        accentOutline: 'border border-green-500 bg-transparent hover:bg-green-600 active:bg-green-700 text-white',
+        accentGhost: 'hover:bg-green-600 active:bg-green-700 text-white',
+        default: 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 text-white',
+        secondary: 'bg-gray-700 text-white hover:bg-gray-800 active:bg-gray-900 text-white',
+        outline: 'border border-gray-600 bg-transparent hover:bg-gray-800 active:bg-gray-900 text-white',
+        ghost: 'hover:bg-gray-800 active:bg-gray-900 text-white',
+        destructive: 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800 text-white',
       },
       size: {
         default: 'h-10 sm:h-10 px-4 py-2 min-h-[44px] sm:min-h-[40px]',

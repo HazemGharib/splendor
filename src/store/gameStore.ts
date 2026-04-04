@@ -42,7 +42,7 @@ export interface GameStore extends GameState {
   takeThreeTokens: (colors: GemColor[]) => void;
   takeTwoTokens: (color: GemColor) => void;
   purchaseCard: (cardId: string, fromReserved?: boolean) => void;
-  reserveCard: (cardId: string) => void;
+  reserveCard: (cardId: string) => boolean;
   discardToken: (color: GemColor) => void;
   endTurn: () => void;
   selectNoble: (nobleId: string) => void;
@@ -462,20 +462,22 @@ export const useGameStore = create<GameStore>()(
         state.hasPerformedAction = true;
       }),
 
-    reserveCard: (cardId) =>
+    reserveCard: (cardId) => {
+      let didReserve = false;
       set((state) => {
         if (state.hasPerformedAction) return;
-        
+
         const currentPlayer = state.players[state.currentPlayerIndex];
-        
+
         if (currentPlayer.reservedCards.length >= GAME_CONSTANTS.PLAYER.MAX_RESERVED_CARDS) {
           return;
         }
-        
+
         // Check if reserving would exceed 10 tokens (since we get a gold token)
         const totalTokens = RuleEngine.getTotalTokenCount(currentPlayer.tokens);
-        const willGetGoldToken = state.tokenSupply.gold > 0 && currentPlayer.tokens.gold < GAME_CONSTANTS.TOKENS.GOLD_TOKENS;
-        
+        const willGetGoldToken =
+          state.tokenSupply.gold > 0 && currentPlayer.tokens.gold < GAME_CONSTANTS.TOKENS.GOLD_TOKENS;
+
         if (willGetGoldToken && totalTokens + 1 > GAME_CONSTANTS.PLAYER.MAX_TOKENS) {
           return;
         }
@@ -500,14 +502,17 @@ export const useGameStore = create<GameStore>()(
 
         if (card) {
           currentPlayer.reservedCards.push(card);
-          
+
           if (willGetGoldToken) {
             currentPlayer.tokens.gold += 1;
             state.tokenSupply.gold -= 1;
           }
           state.hasPerformedAction = true;
+          didReserve = true;
         }
-      }),
+      });
+      return didReserve;
+    },
 
     discardToken: (color) =>
       set((state) => {

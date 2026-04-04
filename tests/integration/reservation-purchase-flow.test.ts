@@ -113,4 +113,29 @@ describe('Card Reservation and Purchase Flow', () => {
     expect(state.players[0].reservedCards).toContainEqual(level2Card);
     expect(state.players[0].reservedCards).toContainEqual(level1Card);
   });
+
+  it('should not add a fourth reserved card and reserveCard returns false', () => {
+    const store = useGameStore.getState();
+    const { cardMarket } = store;
+
+    store.reserveCard(cardMarket.level3.visible[0].id);
+    store.endTurn();
+    store.endTurn();
+
+    store.reserveCard(cardMarket.level2.visible[0].id);
+    store.endTurn();
+    store.endTurn();
+
+    store.reserveCard(cardMarket.level1.visible[0].id);
+    expect(useGameStore.getState().players[0].reservedCards.length).toBe(3);
+
+    store.endTurn();
+    store.endTurn();
+
+    const nextId = useGameStore.getState().cardMarket.level1.visible[0].id;
+    const ok = store.reserveCard(nextId);
+    expect(ok).toBe(false);
+    expect(useGameStore.getState().players[0].reservedCards.length).toBe(3);
+    expect(useGameStore.getState().hasPerformedAction).toBe(false);
+  });
 });

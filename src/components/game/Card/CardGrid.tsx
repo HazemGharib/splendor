@@ -11,6 +11,8 @@ interface CardGridProps {
   deckCount?: number;
   onCardClick?: (cardId: string) => void;
   onReserve?: (cardId: string) => void;
+  /** Current player’s reserved card count (for max-3 rule). */
+  reservedCardCount?: number;
   playerTokens?: import('../../../models/Player').TokenInventory;
   playerBonuses?: import('../../../models/Player').BonusInventory;
   tokenSupply?: TokenSupply;
@@ -23,6 +25,7 @@ export function CardGrid({
   deckCount = 0,
   onCardClick,
   onReserve,
+  reservedCardCount = 0,
   playerTokens,
   playerBonuses,
   tokenSupply,
@@ -30,6 +33,8 @@ export function CardGrid({
   level,
 }: CardGridProps) {
   const totalPlayerTokens = playerTokens ? RuleEngine.getTotalTokenCount(playerTokens) : 0;
+  const reservedSlotsFull =
+    reservedCardCount >= GAME_CONSTANTS.PLAYER.MAX_RESERVED_CARDS;
   
   return (
     <div className="flex flex-col gap-1 sm:gap-2">
@@ -49,15 +54,18 @@ export function CardGrid({
             ? tokenSupply.gold > 0 && playerTokens.gold < GAME_CONSTANTS.TOKENS.GOLD_TOKENS
             : false;
           const wouldExceedLimit = willGetGoldToken && totalPlayerTokens + 1 > GAME_CONSTANTS.PLAYER.MAX_TOKENS;
-          const canReserve = onReserve && !wouldExceedLimit;
-          
+          const canReserve = onReserve && !wouldExceedLimit && !reservedSlotsFull;
+          const reserveUnavailableLabel =
+            onReserve && !canReserve ? "Can't reserve" : undefined;
+
           return (
             <div key={card.id} className="flex-shrink-0 lg:flex-shrink">
               <DevelopmentCardComponent
                 card={card}
                 onClick={canAfford && onCardClick ? () => onCardClick(card.id) : undefined}
-                onReserve={canReserve ? () => onReserve(card.id) : undefined}
+                onReserve={canReserve && onReserve ? () => onReserve(card.id) : undefined}
                 showReserveOption={!!onReserve}
+                reserveUnavailableLabel={reserveUnavailableLabel}
                 disabled={disabled}
               />
             </div>
