@@ -7,9 +7,10 @@ interface NobleTileProps {
   noble: Noble;
   onClick?: () => void;
   disabled?: boolean;
+  isMarket?: boolean;
 }
 
-export function NobleTile({ noble, onClick, disabled }: NobleTileProps) {
+export function NobleTile({ noble, onClick, disabled, isMarket }: NobleTileProps) {
   const portraitUrl = getNoblePortrait(noble.id);
   
   return (
@@ -18,7 +19,9 @@ export function NobleTile({ noble, onClick, disabled }: NobleTileProps) {
         'w-44 h-60 bg-purple-900 border-4 border-purple-700 rounded-lg overflow-hidden',
         'flex flex-col transition-all duration-200 relative touch-manipulation',
         onClick && !disabled && 'hover:scale-95 active:scale-100 cursor-pointer',
-        disabled && 'opacity-50 cursor-not-allowed'
+        disabled && 'opacity-50 cursor-not-allowed',
+        isMarket &&
+          'max-[640px]:w-[126px] max-[640px]:h-[172px] max-[320px]:w-[112px] max-[320px]:h-[154px]'
       )}
       onClick={!disabled ? onClick : undefined}
     >
@@ -37,7 +40,7 @@ export function NobleTile({ noble, onClick, disabled }: NobleTileProps) {
       </div>
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-purple-900 via-purple-900/90 to-transparent z-10 py-4 px-2">
         <NobleRequirements requirements={noble.requirements} />
-        <div className="text-xs font-semibold text-center text-white mt-2">
+        <div className="text-[8px] md:text-xs font-semibold text-center text-white mt-2">
           {noble.name}
         </div>
       </div>

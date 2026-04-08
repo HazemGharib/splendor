@@ -24,7 +24,7 @@ export function CardMarket({
   disabled,
 }: CardMarketProps) {
   return (
-    <div className="bg-gray-900 p-3 sm:p-4 rounded-lg w-full">
+    <div className="bg-gray-900 p-2 sm:p-4 rounded-lg w-full">
       <h2 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3">Card Market</h2>
       
       <div className="space-y-2 sm:space-y-3">

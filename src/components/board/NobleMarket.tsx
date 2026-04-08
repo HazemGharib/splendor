@@ -1,5 +1,9 @@
 import { Noble } from '../../models/Noble';
 import { NobleTile } from '../game/Noble/NobleTile';
+import {
+  MOBILE_MARKET_SCALE_CLASS,
+  MOBILE_MARKET_SLOT_CLASS,
+} from '../../utils/marketTileMobileClasses';
 
 interface NobleMarketProps {
   nobles: Noble[];
@@ -8,12 +12,14 @@ interface NobleMarketProps {
 
 export function NobleMarket({ nobles, disabled }: NobleMarketProps) {
   return (
-    <div className="bg-gray-800 p-3 sm:p-4 rounded-lg">
+    <div className="bg-gray-800 p-2 sm:p-4 rounded-lg">
       <h3 className="text-base sm:text-lg font-semibold mb-2 text-white">Nobles</h3>
-      <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 -mx-2 px-2 sm:mx-0 sm:px-0">
+      <div className="flex gap-1 sm:gap-3 overflow-x-auto pb-2 -mx-1 px-1 sm:-mx-2 sm:px-2">
         {nobles.map((noble) => (
-          <div key={noble.id} className="flex-shrink-0">
-            <NobleTile noble={noble} disabled={disabled} />
+          <div key={noble.id} className={MOBILE_MARKET_SLOT_CLASS}>
+            <div className={`${MOBILE_MARKET_SCALE_CLASS}`}>
+              <NobleTile noble={noble} disabled={disabled} isMarket={true} />
+            </div>
           </div>
         ))}
       </div>
