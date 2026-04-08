@@ -63,14 +63,14 @@ export function WinnerModal({ winner }: WinnerModalProps) {
         </div>
         
         <ModalFooter className="w-full flex flex-row gap-1 sm:flex-row sm:justify-stretch">
-          <Button onClick={handleRestart} variant="theme" className="w-full text-2xl" style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }} size="lg">
+          <Button onClick={handleRestart} variant="theme" className="w-full text-2xl px-2" style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }} size="lg">
             Play Again
           </Button>
           <Button
             type="button"
             variant="themeOutline"
             onClick={handleExit}
-            className="w-full text-xl"
+            className="w-full text-2xl px-2"
             style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }}
             size="lg"
           >
