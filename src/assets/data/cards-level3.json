@@ -1,25 +1,29 @@
 {
   "level": 3,
   "cards": [
-    { "id": "L3-001", "cost": { "onyx": 7 }, "prestige": 4, "bonus": "diamond" },
-    { "id": "L3-002", "cost": { "diamond": 3, "onyx": 7 }, "prestige": 5, "bonus": "diamond" },
-    { "id": "L3-003", "cost": { "diamond": 3, "ruby": 3, "onyx": 6 }, "prestige": 4, "bonus": "diamond" },
-    { "id": "L3-004", "cost": { "sapphire": 3, "emerald": 3, "ruby": 5, "onyx": 3 }, "prestige": 3, "bonus": "diamond" },
-    { "id": "L3-005", "cost": { "diamond": 7 }, "prestige": 4, "bonus": "sapphire" },
-    { "id": "L3-006", "cost": { "diamond": 7, "sapphire": 3 }, "prestige": 5, "bonus": "sapphire" },
-    { "id": "L3-007", "cost": { "diamond": 6, "sapphire": 3, "onyx": 3 }, "prestige": 4, "bonus": "sapphire" },
-    { "id": "L3-008", "cost": { "diamond": 3, "emerald": 3, "ruby": 3, "onyx": 5 }, "prestige": 3, "bonus": "sapphire" },
-    { "id": "L3-009", "cost": { "sapphire": 7 }, "prestige": 4, "bonus": "emerald" },
-    { "id": "L3-010", "cost": { "sapphire": 7, "emerald": 3 }, "prestige": 5, "bonus": "emerald" },
-    { "id": "L3-011", "cost": { "diamond": 3, "sapphire": 6, "emerald": 3 }, "prestige": 4, "bonus": "emerald" },
-    { "id": "L3-012", "cost": { "diamond": 5, "sapphire": 3, "ruby": 3, "onyx": 3 }, "prestige": 3, "bonus": "emerald" },
-    { "id": "L3-013", "cost": { "emerald": 7 }, "prestige": 4, "bonus": "ruby" },
-    { "id": "L3-014", "cost": { "emerald": 7, "ruby": 3 }, "prestige": 5, "bonus": "ruby" },
-    { "id": "L3-015", "cost": { "sapphire": 3, "emerald": 6, "ruby": 3 }, "prestige": 4, "bonus": "ruby" },
-    { "id": "L3-016", "cost": { "diamond": 3, "sapphire": 5, "emerald": 3, "onyx": 3 }, "prestige": 3, "bonus": "ruby" },
-    { "id": "L3-017", "cost": { "ruby": 7 }, "prestige": 4, "bonus": "onyx" },
-    { "id": "L3-018", "cost": { "ruby": 7, "onyx": 3 }, "prestige": 5, "bonus": "onyx" },
-    { "id": "L3-019", "cost": { "emerald": 3, "ruby": 6, "onyx": 3 }, "prestige": 4, "bonus": "onyx" },
-    { "id": "L3-020", "cost": { "diamond": 3, "sapphire": 3, "emerald": 5, "ruby": 3 }, "prestige": 3, "bonus": "onyx" }
+    { "id": "L3-001", "cost": { "diamond": 3, "sapphire": 3, "onyx": 5, "ruby": 3 }, "prestige": 3, "bonus": "emerald" },
+    { "id": "L3-002", "cost": { "emerald": 7 }, "prestige": 5, "bonus": "emerald" },
+    { "id": "L3-003", "cost": { "emerald": 3, "diamond": 6, "sapphire": 3 }, "prestige": 4, "bonus": "emerald" },
+    { "id": "L3-004", "cost": { "onyx": 7 }, "prestige": 4, "bonus": "emerald" },
+
+    { "id": "L3-005", "cost": { "emerald": 3, "diamond": 3, "sapphire": 5, "ruby": 3 }, "prestige": 3, "bonus": "diamond" },
+    { "id": "L3-006", "cost": { "diamond": 7 }, "prestige": 5, "bonus": "diamond" },
+    { "id": "L3-007", "cost": { "diamond": 6, "onyx": 3, "ruby": 3 }, "prestige": 4, "bonus": "diamond" },
+    { "id": "L3-008", "cost": { "ruby": 7 }, "prestige": 4, "bonus": "diamond" },
+
+    { "id": "L3-009", "cost": { "emerald": 5, "diamond": 3, "onyx": 3, "ruby": 3 }, "prestige": 3, "bonus": "sapphire" },
+    { "id": "L3-010", "cost": { "sapphire": 7 }, "prestige": 5, "bonus": "sapphire" },
+    { "id": "L3-011", "cost": { "emerald": 3, "sapphire": 6, "ruby": 3 }, "prestige": 4, "bonus": "sapphire" },
+    { "id": "L3-012", "cost": { "emerald": 7 }, "prestige": 4, "bonus": "sapphire" },
+
+    { "id": "L3-013", "cost": { "emerald": 3, "sapphire": 3, "diamond": 3, "ruby": 5 }, "prestige": 3, "bonus": "onyx" },
+    { "id": "L3-014", "cost": { "onyx": 7 }, "prestige": 5, "bonus": "onyx" },
+    { "id": "L3-015", "cost": { "diamond": 3, "sapphire": 3, "onyx": 6 }, "prestige": 4, "bonus": "onyx" },
+    { "id": "L3-016", "cost": { "sapphire": 7 }, "prestige": 4, "bonus": "onyx" },
+
+    { "id": "L3-017", "cost": { "emerald": 3, "diamond": 3, "sapphire": 3, "onyx": 5 }, "prestige": 3, "bonus": "ruby" },
+    { "id": "L3-018", "cost": { "ruby": 7 }, "prestige": 5, "bonus": "ruby" },
+    { "id": "L3-019", "cost": { "emerald": 3, "diamond": 3, "ruby": 6 }, "prestige": 4, "bonus": "ruby" },
+    { "id": "L3-020", "cost": { "diamond": 7 }, "prestige": 4, "bonus": "ruby" }
   ]
 }
