@@ -20,6 +20,17 @@ const updateSW = registerSW({
   },
 });
 
+// When the new service worker takes control after SKIP_WAITING, reload once
+// so the app starts using the latest precached assets.
+if ('serviceWorker' in navigator) {
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return;
+    refreshing = true;
+    window.location.reload();
+  });
+}
+
 initAnalytics();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
