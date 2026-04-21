@@ -10,7 +10,13 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'sw.ts',
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.png', 'icon-192.png', 'icon-512.png', 'assets/**/*'],
+      includeAssets: [
+        'favicon.png',
+        'icon-192.png',
+        'icon-512.png',
+        'manifest.json',
+        'assets/**/*',
+      ],
       manifest: {
         name: 'Splendor - Renaissance Card Game',
         short_name: 'Splendor',
@@ -56,9 +62,9 @@ export default defineConfig({
         ]
       },
       injectManifest: {
-        globPatterns: ['**/*.{js,css,html,png,svg,ttf}'],
-        maximumFileSizeToCacheInBytes: 5000000
-      }
+        globPatterns: ['**/*.{js,css,html,json,png,jpg,jpeg,webp,svg,gif,ico,ttf,woff,woff2}'],
+        maximumFileSizeToCacheInBytes: 5000000,
+      },
     })
   ],
   server: {

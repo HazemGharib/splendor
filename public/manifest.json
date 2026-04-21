@@ -5,8 +5,8 @@
   "description": "Build your gem empire in this classic Renaissance-themed strategy card game",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffaf07",
-  "theme_color": "#ffaf07",
+  "background_color": "#ffc007",
+  "theme_color": "#ffc007",
   "orientation": "any",
   "icons": [
     {

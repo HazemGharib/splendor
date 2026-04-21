@@ -32,8 +32,8 @@ registerRoute(
         statuses: [0, 200],
       }),
       new ExpirationPlugin({
-        maxEntries: 60,
-        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+        maxEntries: 120,
+        maxAgeSeconds: 60 * 24 * 60 * 60, // 60 days
       }),
     ],
   })
@@ -51,6 +51,25 @@ registerRoute(
       new ExpirationPlugin({
         maxEntries: 20,
         maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
+      }),
+    ],
+  })
+);
+
+// Cache JSON game data and other static data files for offline play
+registerRoute(
+  ({ request, url }) =>
+    request.destination === '' &&
+    (url.pathname.endsWith('.json') || url.pathname.startsWith('/assets/')),
+  new CacheFirst({
+    cacheName: 'data-cache',
+    plugins: [
+      new CacheableResponsePlugin({
+        statuses: [0, 200],
+      }),
+      new ExpirationPlugin({
+        maxEntries: 80,
+        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
       }),
     ],
   })
@@ -75,8 +94,8 @@ registerRoute(
 
 // Stale While Revalidate for other requests
 registerRoute(
-  ({ request }) => 
-    request.destination === 'script' || 
+  ({ request }) =>
+    request.destination === 'script' ||
     request.destination === 'style',
   new StaleWhileRevalidate({
     cacheName: 'static-resources',
