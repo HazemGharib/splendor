@@ -15,6 +15,7 @@ import { NobleVisitAnnouncement } from '../ui/NobleVisitAnnouncement';
 import { GemColor } from '../../models/Card';
 import { AIService } from '../../services/AIService';
 import { useSplendorTitleDebugTap } from '../../hooks/useDebugEasterEgg';
+import { useCardActionAnimation } from '../../hooks/useCardActionAnimation';
 import { trackEvent } from '../../services/analytics/posthogClient';
 
 export function GameBoard() {
@@ -42,6 +43,7 @@ export function GameBoard() {
 
   const [isAIThinking, setIsAIThinking] = useState(false);
   const [titleBlessingActive, setTitleBlessingActive] = useState(false);
+  const { animatingCard, runWithAnimation } = useCardActionAnimation();
   const aiTurnInProgressRef = useRef(false);
   const titleTapTimesRef = useRef<number[]>([]);
   const titleBlessingTimeoutRef = useRef<number | null>(null);
@@ -186,11 +188,12 @@ export function GameBoard() {
       card_id: cardId,
       from_reserved: Boolean(fromReserved),
     });
-    purchaseCard(cardId, fromReserved);
-    // Auto-end turn after action
-    setTimeout(() => {
-      endTurn();
-    }, 500);
+    runWithAnimation(cardId, 'purchase', () => {
+      purchaseCard(cardId, fromReserved);
+      setTimeout(() => {
+        endTurn();
+      }, 500);
+    });
   };
 
   const handlePurchaseReserved = (cardId: string) => {
@@ -198,23 +201,26 @@ export function GameBoard() {
       component_id: 'reserved_cards',
       card_id: cardId,
     });
-    purchaseCard(cardId, true);
-    // Auto-end turn after action
-    setTimeout(() => {
-      endTurn();
-    }, 500);
+    runWithAnimation(cardId, 'purchase', () => {
+      purchaseCard(cardId, true);
+      setTimeout(() => {
+        endTurn();
+      }, 500);
+    });
   };
 
   const handleReserveCard = (cardId: string) => {
-    const ok = reserveCard(cardId);
-    if (!ok) return;
-    trackEvent('reserve_card_clicked', {
-      component_id: 'card_market',
-      card_id: cardId,
+    runWithAnimation(cardId, 'reserve', () => {
+      const ok = reserveCard(cardId);
+      if (!ok) return;
+      trackEvent('reserve_card_clicked', {
+        component_id: 'card_market',
+        card_id: cardId,
+      });
+      setTimeout(() => {
+        endTurn();
+      }, 500);
     });
-    setTimeout(() => {
-      endTurn();
-    }, 500);
   };
 
   if (phase === GamePhase.SETUP) {
@@ -229,29 +235,49 @@ export function GameBoard() {
 
   const isCurrentPlayerAI = currentPlayer?.isAI || false;
 
+  const playerEntries = players.map((player, index) => ({ player, index }));
+  const sortedPlayerEntries = [...playerEntries].sort((a, b) => {
+    const aCurrent = a.index === currentPlayerIndex && phase === GamePhase.PLAYING;
+    const bCurrent = b.index === currentPlayerIndex && phase === GamePhase.PLAYING;
+    if (aCurrent === bCurrent) return a.index - b.index;
+    return aCurrent ? -1 : 1;
+  });
+
   return (
-    <div className="min-h-screen bg-gray-950 p-2 sm:p-4 lg:p-6">
-      <div className="max-w-[2000px] mx-auto">
+    <div className="app-bg min-h-dvh px-safe pb-safe pt-safe">
+      <div className="mx-auto max-w-[2000px] p-2 sm:p-4 lg:p-6">
         {/* Header */}
-        <div className="flex justify-between items-center mb-3 sm:mb-4">
+        <header className="mb-2 flex items-center justify-between gap-2 sm:mb-4">
           <h1
-            className={`text-2xl sm:text-3xl lg:text-4xl font-bold select-none transition-all duration-1000 ${
+            className={`select-none text-xl font-bold transition-all duration-1000 sm:text-3xl lg:text-4xl ${
               titleBlessingActive
                 ? 'text-amber-100 drop-shadow-[0_0_14px_rgba(251,191,36,0.55)] animate-[pulse_2.8s_ease-in-out_infinite]'
-                : 'text-white'
+                : 'bg-gradient-to-b from-white via-amber-50 to-amber-200/80 bg-clip-text text-transparent'
             }`}
             style={{ fontFamily: "'Press Gutenberg', Georgia, serif" }}
             onClick={handleSplendorTitleTap}
           >
             Splendor
           </h1>
-          <div className="flex gap-2">
+          <div className="flex shrink-0 gap-1.5 sm:gap-2">
             <HelpModal />
             <SettingsModal />
           </div>
-        </div>
-        
-        {/* Turn Indicator — hidden on small screens (current player still highlighted in player panels) */}
+        </header>
+
+        {/* Sticky turn bar — mobile only */}
+        {currentPlayer && (
+          <div className="sticky top-0 z-30 -mx-2 mb-2 bg-[#070a12]/85 px-2 py-1.5 backdrop-blur-md sm:hidden">
+            <TurnIndicator
+              compact
+              currentPlayer={currentPlayer}
+              hasPerformedAction={hasPerformedAction}
+              isAIThinking={isAIThinking}
+            />
+          </div>
+        )}
+
+        {/* Turn indicator — tablet+ */}
         {currentPlayer && (
           <div className="mb-3 hidden sm:block">
             <TurnIndicator
@@ -261,47 +287,67 @@ export function GameBoard() {
             />
           </div>
         )}
-        
-        {/* Nobles - Full width row */}
+
+        {/* Nobles */}
         <div className="mb-3">
           <NobleMarket nobles={nobles} disabled={phase === GamePhase.GAME_OVER || isCurrentPlayerAI} />
         </div>
-        
-        {/* Main game area - Two columns on desktop */}
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-3 sm:gap-4">
-          {/* Left column: Card Market */}
-          <CardMarket
-            market={cardMarket}
-            onCardClick={handlePurchaseCard}
-            onReserve={handleReserveCard}
-            reservedCardCount={currentPlayer?.reservedCards.length ?? 0}
-            playerTokens={currentPlayer?.tokens}
-            playerBonuses={currentPlayer?.bonuses}
-            tokenSupply={tokenSupply}
-            disabled={phase === GamePhase.GAME_OVER || hasPerformedAction || isCurrentPlayerAI}
-          />
-          
-          {/* Right column: Token Selector + All Players */}
-          <div className="space-y-3">
+
+        {/* Main game area — mobile: actions first, then market */}
+        <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(0,1fr)_min(100%,22.5rem)] lg:gap-4">
+          {/* Sidebar: tokens + players (first on mobile) */}
+          <aside className="order-1 flex flex-col gap-3 lg:order-2">
             {!isCurrentPlayerAI && (
               <TokenSelector
                 supply={tokenSupply}
-                playerTokens={currentPlayer?.tokens || { emerald: 0, diamond: 0, sapphire: 0, onyx: 0, ruby: 0, gold: 0 }}
+                playerTokens={
+                  currentPlayer?.tokens || {
+                    emerald: 0,
+                    diamond: 0,
+                    sapphire: 0,
+                    onyx: 0,
+                    ruby: 0,
+                    gold: 0,
+                  }
+                }
                 onTakeTokens={handleTakeTokens}
                 disabled={phase === GamePhase.GAME_OVER || hasPerformedAction}
               />
             )}
-            
-            {players.map((player, index) => (
-              <PlayerArea
-                key={player.id}
-                player={player}
-                isCurrentPlayer={index === currentPlayerIndex && phase === GamePhase.PLAYING}
-                onPurchaseReserved={handlePurchaseReserved}
-                hasPerformedAction={hasPerformedAction}
-              />
-            ))}
-          </div>
+
+            {sortedPlayerEntries.map(({ player, index }) => {
+              const isCurrent = index === currentPlayerIndex && phase === GamePhase.PLAYING;
+
+              return (
+                <PlayerArea
+                  key={player.id}
+                  player={player}
+                  isCurrentPlayer={isCurrent}
+                  onPurchaseReserved={handlePurchaseReserved}
+                  hasPerformedAction={hasPerformedAction}
+                  animatingCardId={animatingCard?.id ?? null}
+                  animatingCardType={animatingCard?.type ?? null}
+                  compact={!isCurrent}
+                />
+              );
+            })}
+          </aside>
+
+          {/* Card market (second on mobile) */}
+          <main className="order-2 min-w-0 lg:order-1">
+            <CardMarket
+              market={cardMarket}
+              onCardClick={handlePurchaseCard}
+              onReserve={handleReserveCard}
+              reservedCardCount={currentPlayer?.reservedCards.length ?? 0}
+              playerTokens={currentPlayer?.tokens}
+              playerBonuses={currentPlayer?.bonuses}
+              tokenSupply={tokenSupply}
+              disabled={phase === GamePhase.GAME_OVER || hasPerformedAction || isCurrentPlayerAI}
+              animatingCardId={animatingCard?.id ?? null}
+              animatingCardType={animatingCard?.type ?? null}
+            />
+          </main>
         </div>
       </div>
       

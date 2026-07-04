@@ -6,7 +6,7 @@ export function CardPrestige({ prestige }: CardPrestigeProps) {
   if (prestige === 0) return null;
   
   return (
-    <div className="absolute top-2 right-2 bg-slate-200 text-black font-bold rounded-full w-6 h-6 flex items-center justify-center text-sm">
+    <div className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-b from-amber-100 to-amber-300 text-sm font-bold text-gray-900 shadow-md shadow-black/40 ring-1 ring-white/50">
       {prestige}
     </div>
   );

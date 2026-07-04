@@ -15,6 +15,29 @@ import { Noble } from '../../models/Noble';
 import { cn } from '../../utils/cn';
 import { trackEvent } from '../../services/analytics/posthogClient';
 
+function QuestionIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.75" />
+      <path
+        d="M9.5 9.3a2.5 2.5 0 114.1 1.9c-.7.6-1.6 1.1-1.6 2.05v.25"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+      <circle cx="12" cy="16.8" r="0.9" fill="currentColor" />
+    </svg>
+  );
+}
+
+function CloseIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 /** Dev cards & nobles are built as w-44 × h-60 (11∶15). Scale uniformly inside a fixed-aspect frame. */
 function HelpModalTileFrame({
   className,
@@ -130,7 +153,7 @@ export function HelpModal() {
           aria-label="Help"
           onClick={() => trackEvent('help_opened', { component_id: 'help_modal' })}
         >
-          ❔
+          <QuestionIcon className="h-5 w-5" />
         </Button>
       </ModalTrigger>
       <ModalContent className="max-w-sm lg:max-w-2xl max-h-[82vh] sm:max-h-[86vh] lg:max-h-[88vh] overflow-y-auto rounded-xl">
@@ -141,7 +164,7 @@ export function HelpModal() {
             aria-label="Close help"
             className="absolute right-2 top-2 text-gray-300 hover:text-white"
           >
-            ✕
+            <CloseIcon className="h-5 w-5" />
           </Button>
         </ModalClose>
         <ModalHeader>

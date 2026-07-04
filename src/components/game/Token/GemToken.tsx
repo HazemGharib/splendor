@@ -8,6 +8,8 @@ interface GemTokenProps {
   onClick?: () => void;
   disabled?: boolean;
   size?: 'sm' | 'md' | 'lg';
+  selected?: boolean;
+  isCollecting?: boolean;
 }
 
 const colorClasses: Record<GemColor, string> = {
@@ -43,42 +45,56 @@ const gemLabels: Record<GemColor, string> = {
   [GemColor.GOLD]: 'G',
 };
 
-export function GemToken({ color, count, onClick, disabled, size = 'md' }: GemTokenProps) {
+export function GemToken({
+  color,
+  count,
+  onClick,
+  disabled,
+  size = 'md',
+  selected = false,
+  isCollecting = false,
+}: GemTokenProps) {
   const { enabled: colorblindMode } = useColorblindMode();
-  
+  const isInteractive = Boolean(onClick && !disabled && count !== 0 && !isCollecting);
+
   return (
     <div className="flex flex-col items-center gap-1">
       <button
         onClick={onClick}
-        disabled={disabled || count === 0}
+        disabled={disabled || count === 0 || isCollecting}
         className={cn(
-          'rounded-full border-[3px] flex items-center justify-center font-bold transition-all duration-300 relative',
+          'gem-token-btn rounded-full border-[3px] flex items-center justify-center font-bold relative',
+          'transition-[transform,box-shadow] duration-200 ease-out touch-manipulation',
           colorClasses[color],
           sizeClasses[size],
-          onClick && !disabled && count !== 0 && 'hover:scale-110 hover:-translate-y-1 cursor-pointer active:scale-105 active:translate-y-0',
+          isInteractive && 'hover:scale-110 hover:-translate-y-0.5 cursor-pointer active:scale-95 active:translate-y-0',
+          selected && !isCollecting && 'ring-[3px] ring-yellow-300 ring-offset-2 ring-offset-gray-900 scale-105 token-selected-shimmer',
+          isCollecting && 'token-collect',
           disabled && 'opacity-50 cursor-not-allowed'
         )}
         style={{
-          boxShadow: onClick && !disabled && count !== 0 
+          boxShadow: isInteractive
             ? '0 12px 24px rgba(0,0,0,0.4), 0 6px 12px rgba(0,0,0,0.3), inset 0 -4px 8px rgba(0,0,0,0.25), inset 0 4px 12px rgba(255,255,255,0.4), inset 0 -1px 2px rgba(0,0,0,0.3)'
             : '0 8px 16px rgba(0,0,0,0.3), 0 4px 8px rgba(0,0,0,0.2), inset 0 -3px 6px rgba(0,0,0,0.2), inset 0 3px 8px rgba(255,255,255,0.35)',
-          transform: onClick && !disabled && count !== 0 ? 'perspective(1000px)' : undefined
         }}
-        aria-label={`${color} token${count !== undefined ? `: ${count}` : ''}`}
+        aria-label={`${color} token${count !== undefined ? `: ${count}` : ''}${selected ? ', selected' : ''}`}
+        aria-pressed={selected || undefined}
       >
-        {/* Top highlight for glossy 3D effect */}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/50 via-white/10 to-transparent pointer-events-none" 
-             style={{ clipPath: 'ellipse(40% 30% at 50% 20%)' }} 
+        <div
+          className="absolute inset-0 rounded-full bg-gradient-to-b from-white/50 via-white/10 to-transparent pointer-events-none"
+          style={{ clipPath: 'ellipse(40% 30% at 50% 20%)' }}
         />
-        
-        {/* Bottom shadow for depth */}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" 
-             style={{ clipPath: 'ellipse(45% 25% at 50% 85%)' }} 
+
+        <div
+          className="absolute inset-0 rounded-full bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none"
+          style={{ clipPath: 'ellipse(45% 25% at 50% 85%)' }}
         />
-        
+
         {count !== undefined && (
-          <span className="text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] font-extrabold relative z-10 text-shadow-lg" 
-                style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.4)' }}>
+          <span
+            className="text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] font-extrabold relative z-10"
+            style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.4)' }}
+          >
             {count}
           </span>
         )}

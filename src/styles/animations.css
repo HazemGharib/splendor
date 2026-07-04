@@ -10,18 +10,94 @@
   }
 }
 
-@keyframes token-collect {
+@keyframes card-purchase {
   0% {
-    transform: scale(1);
+    transform: scale(1) translateY(0);
     opacity: 1;
+    filter: brightness(1);
   }
-  50% {
-    transform: scale(1.2);
-    opacity: 0.8;
+  35% {
+    transform: scale(1.06) translateY(-10px);
+    opacity: 1;
+    filter: brightness(1.15);
   }
   100% {
-    transform: scale(0.8);
-    opacity: 0.6;
+    transform: scale(0.55) translateY(-48px);
+    opacity: 0;
+    filter: brightness(1.3);
+  }
+}
+
+@keyframes card-reserve {
+  0% {
+    transform: scale(1) translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+  45% {
+    transform: scale(0.96) translateX(8px) rotate(2deg);
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(0.65) translateX(72px) rotate(6deg);
+    opacity: 0;
+  }
+}
+
+@keyframes card-enter {
+  0% {
+    transform: translateY(16px) scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes token-collect {
+  0% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+  30% {
+    transform: scale(1.18) translateY(-8px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.4) translateY(-28px);
+    opacity: 0;
+  }
+}
+
+@keyframes token-select-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.14);
+  }
+  100% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes turn-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(250, 204, 21, 0);
+  }
+}
+
+@keyframes token-gem-shimmer {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.2);
   }
 }
 
@@ -29,8 +105,36 @@
   animation: card-flip 0.6s ease-in-out;
 }
 
+.card-purchase {
+  animation: card-purchase 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.card-reserve {
+  animation: card-reserve 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.card-enter {
+  animation: card-enter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 .token-collect {
-  animation: token-collect 0.4s ease-out forwards;
+  animation: token-collect 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.token-select-pop {
+  animation: token-select-pop 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.token-selected-shimmer {
+  animation: token-gem-shimmer 1.5s ease-in-out 1;
+}
+
+.turn-pulse {
+  animation: turn-pulse 2s ease-in-out 2;
 }
 
 /* Debug panel — use longhand so fill-mode is not mistaken for delay in shorthand */
@@ -107,8 +211,20 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .token-collect {
+  .card-flip,
+  .card-purchase,
+  .card-reserve,
+  .card-enter,
+  .token-collect,
+  .token-select-pop,
+  .token-selected-shimmer,
+  .turn-pulse {
     animation: none;
+  }
+
+  .card-purchase,
+  .card-reserve {
+    opacity: 0;
   }
 
   .debug-backdrop-enter,

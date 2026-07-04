@@ -16,7 +16,8 @@ export function NobleTile({ noble, onClick, disabled, isMarket }: NobleTileProps
   return (
     <div
       className={cn(
-        'w-44 h-60 bg-purple-900 border-4 border-purple-700 rounded-lg overflow-hidden',
+        'w-44 h-60 bg-purple-950 border-2 border-purple-600/70 rounded-xl overflow-hidden',
+        'shadow-lg shadow-black/40 ring-1 ring-white/10',
         'flex flex-col transition-all duration-200 relative touch-manipulation',
         onClick && !disabled && 'hover:scale-95 active:scale-100 cursor-pointer',
         disabled && 'opacity-50 cursor-not-allowed',
@@ -34,7 +35,7 @@ export function NobleTile({ noble, onClick, disabled, isMarket }: NobleTileProps
       />
       
       <div className="flex justify-center mt-2 absolute top-6 right-1">
-        <div className="bg-yellow-100 text-black font-bold rounded-full w-6 h-6 flex items-center justify-center text-sm">
+        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-b from-amber-100 to-amber-300 text-sm font-bold text-gray-900 shadow-md shadow-black/40 ring-1 ring-white/50">
           {noble.prestige}
         </div>
       </div>

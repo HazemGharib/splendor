@@ -1,4 +1,5 @@
 import { CardCost as CardCostType, GemColor } from '../../../models/Card';
+import { GemIllustration, type GemKind } from '../Gem/GemIllustration';
 import { cn } from '../../../utils/cn';
 
 interface CardCostProps {
@@ -38,7 +39,7 @@ export function CardCost({ cost, showDiscount, discount }: CardCostProps) {
             {showDiscount && discountAmount > 0 && (
               <span className="line-through opacity-50 text-xs">{amount}</span>
             )}
-            <div className={cn('gem-bonus z-10', `gem-${color} gem-${color}-xs`)} />
+            <GemIllustration kind={color as GemKind} size="xs" className="z-10" />
           </div>
         );
       })}

@@ -1,5 +1,5 @@
 import { CardBonus as CardBonusType } from '../../../models/Card';
-import { cn } from '../../../utils/cn';
+import { GemIllustration } from '../Gem/GemIllustration';
 import { useColorblindMode } from '../../../hooks/useColorblindMode';
 
 interface CardBonusProps {
@@ -17,15 +17,10 @@ const gemLabels: Record<CardBonusType, string> = {
 
 export function CardBonus({ bonus, size = 'md' }: CardBonusProps) {
   const { enabled: colorblindMode } = useColorblindMode();
-  const gemClass = `gem-${bonus}`;
-  const sizeClass = size === 'lg' ? `gem-${bonus}-lg` : size === 'sm' ? `gem-${bonus}-sm` : '';
-  
+
   return (
-    <div className="relative inline-block">
-      <div
-        className={cn('gem-bonus', gemClass, sizeClass)}
-        title={`${bonus} bonus`}
-      />
+    <div className="gem-bonus relative inline-block" title={`${bonus} bonus`}>
+      <GemIllustration kind={bonus} size={size} />
       {colorblindMode && (
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="text-white font-bold text-xs drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">

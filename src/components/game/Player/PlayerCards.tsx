@@ -64,7 +64,7 @@ export function PlayerCards({ cards }: PlayerCardsProps) {
                 );
               })}
             </div>
-            <div className="text-xs font-semibold text-white bg-gray-700 px-2 py-0.5 rounded">
+            <div className="rounded-full border border-white/10 bg-white/10 px-2 py-0.5 text-xs font-semibold text-white">
               {colorCards.length}{hasMore && '+'}
             </div>
           </div>

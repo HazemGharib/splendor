@@ -26,12 +26,61 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  min-height: 100dvh;
   overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Safe-area insets for notched phones */
+.pt-safe {
+  padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+}
+
+.pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+}
+
+.px-safe {
+  padding-left: max(0.5rem, env(safe-area-inset-left, 0px));
+  padding-right: max(0.5rem, env(safe-area-inset-right, 0px));
 }
 
 #root {
   width: 100%;
   min-height: 100vh;
+}
+
+/* Modern layered app background — deep slate with ambient amber/indigo glows */
+.app-bg {
+  background-color: #070a12;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(217, 119, 6, 0.13), transparent 60%),
+    radial-gradient(ellipse 70% 50% at 85% 0%, rgba(79, 70, 229, 0.1), transparent 55%),
+    radial-gradient(ellipse 90% 60% at 50% 110%, rgba(21, 128, 61, 0.08), transparent 60%),
+    linear-gradient(180deg, #0b0f1a 0%, #070a12 100%);
+  background-attachment: fixed;
+}
+
+/* Frosted glass surface used by panels and bars */
+.glass-panel {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.045) 0%,
+    rgba(255, 255, 255, 0.015) 100%
+  );
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* Keyboard-visible focus ring, consistent across the app */
+:focus-visible {
+  outline: 2px solid rgba(251, 191, 36, 0.8);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
 /* Smooth scrolling for horizontal scroll areas */
@@ -63,17 +112,19 @@ body {
 
 /* Touch optimization */
 @media (hover: none) and (pointer: coarse) {
-  /* Increase touch targets on mobile */
-  button, a, [role="button"] {
+  /* Increase touch targets on primary controls — skip gem/token visuals */
+  button:not(.gem-token-btn),
+  a,
+  [role="button"]:not(.gem-token-hit) {
     min-height: 44px;
     min-width: 44px;
   }
-  
+
   /* Disable hover effects on touch devices */
   .hover\:scale-105:hover {
     transform: none;
   }
-  
+
   /* Use active state instead */
   .hover\:scale-105:active {
     transform: scale(0.98);

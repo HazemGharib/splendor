@@ -7,10 +7,18 @@ const levelColors = {
   3: 'border-purple-700 bg-purple-900',
 };
 
+/**
+ * Renaissance-style card back: engraved frame with corner flourishes,
+ * a central jeweled medallion holding a Florentine fleur-de-lis (giglio),
+ * scrollwork above and below, and level pips along the bottom.
+ * Drawn in white at varying opacities so it works on every level color.
+ */
 function MiniCardBackArt({ level }: { level: 1 | 2 | 3 }) {
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, '') || '0';
   const shineId = `gemGradL${level}_${uid}`;
   const shineFillUrl = `url('#${shineId}')`;
+
+  const pipOffsets = { 1: [0], 2: [-2.7, 2.7], 3: [-5.4, 0, 5.4] }[level];
 
   return (
     <svg
@@ -32,7 +40,8 @@ function MiniCardBackArt({ level }: { level: 1 | 2 | 3 }) {
           <stop offset="100%" stopColor="#fff" stopOpacity={`${level * 0.05}`} />
         </linearGradient>
       </defs>
-      <rect width="44" height="62" fill="none" />
+
+      {/* Base and double frame */}
       <rect
         x="0"
         y="0"
@@ -55,47 +64,77 @@ function MiniCardBackArt({ level }: { level: 1 | 2 | 3 }) {
         strokeOpacity={0.16}
         strokeWidth="0.55"
       />
-      <path d="M8 10 10 12.8 8 15.6 6 12.8Z" fill="white" fillOpacity={0.2} />
-      <path d="M36 10 38 12.8 36 15.6 34 12.8Z" fill="white" fillOpacity={0.2} />
-      <path d="M8 46.4 10 49.2 8 52 6 49.2Z" fill="white" fillOpacity={0.2} />
-      <path d="M36 46.4 38 49.2 36 52 34 49.2Z" fill="white" fillOpacity={0.2} />
-      <circle cx="5.2" cy="31" r="1.15" fill="white" fillOpacity={0.14} />
-      <circle cx="38.8" cy="31" r="1.15" fill="white" fillOpacity={0.14} />
+
+      {/* Corner flourishes with set dots */}
       <path
-        d="M22 11.5 26.5 17.2 22 14.2 17.5 17.2Z"
-        fill="white"
-        fillOpacity={0.18}
-      />
-      <path
-        d="M 22 15.5 L 31.8 30.5 L 27.2 45.2 L 16.8 45.2 L 12.2 30.5 Z"
-        fill="white"
-        fillOpacity={0.1}
+        d="M6.5 13V9.5Q6.5 6.5 9.5 6.5H13M31 6.5H34.5Q37.5 6.5 37.5 9.5V13M37.5 49V52.5Q37.5 55.5 34.5 55.5H31M13 55.5H9.5Q6.5 55.5 6.5 52.5V49"
         stroke="white"
-        strokeOpacity={0.34}
-        strokeWidth="0.65"
-        strokeLinejoin="round"
+        strokeOpacity={0.3}
+        strokeWidth="0.6"
+        fill="none"
+        strokeLinecap="round"
       />
+      <circle cx="9.3" cy="9.3" r="0.9" fill="white" fillOpacity={0.22} />
+      <circle cx="34.7" cy="9.3" r="0.9" fill="white" fillOpacity={0.22} />
+      <circle cx="34.7" cy="52.7" r="0.9" fill="white" fillOpacity={0.22} />
+      <circle cx="9.3" cy="52.7" r="0.9" fill="white" fillOpacity={0.22} />
+
+      {/* Scrollwork flourishes */}
       <path
-        d="M22 22v17M15.5 31.5h13"
+        d="M14 13.5C17 11 19.5 11 22 12.6C24.5 11 27 11 30 13.5"
         stroke="white"
-        strokeOpacity={0.14}
-        strokeWidth="0.45"
+        strokeOpacity={0.2}
+        strokeWidth="0.5"
+        fill="none"
         strokeLinecap="round"
       />
       <path
-        d="M22 18.5c-2.2 3.6-2.2 8.4 0 12"
-        fill="none"
+        d="M14 48.5C17 51 19.5 51 22 49.4C24.5 51 27 51 30 48.5"
         stroke="white"
-        strokeOpacity={0.1}
-        strokeWidth="0.4"
+        strokeOpacity={0.2}
+        strokeWidth="0.5"
+        fill="none"
+        strokeLinecap="round"
       />
+
+      {/* Medallion: double ring with gems set at the compass points */}
+      <circle cx="22" cy="31" r="13.5" fill="none" stroke="white" strokeOpacity={0.3} strokeWidth="0.65" />
+      <circle cx="22" cy="31" r="11.4" fill="none" stroke="white" strokeOpacity={0.14} strokeWidth="0.45" />
+      <circle cx="22" cy="17.5" r="1" fill="white" fillOpacity={0.28} />
+      <circle cx="22" cy="44.5" r="1" fill="white" fillOpacity={0.28} />
+      <circle cx="8.5" cy="31" r="1" fill="white" fillOpacity={0.28} />
+      <circle cx="35.5" cy="31" r="1" fill="white" fillOpacity={0.28} />
+
+      {/* Fleur-de-lis */}
+      <g fill="white" fillOpacity={0.26} stroke="white" strokeOpacity={0.38} strokeWidth="0.5" strokeLinejoin="round">
+        {/* Central petal */}
+        <path d="M22 21.5C19.9 24.8 19.7 28.4 22 31.8C24.3 28.4 24.1 24.8 22 21.5Z" />
+        {/* Side petals curling outward */}
+        <path d="M20.6 31.6C17.6 31.4 15.4 29.4 15.3 26.6C13.6 28.8 14.3 32.2 17 33.4C18.3 34 19.8 34 20.6 33.7Z" />
+        <path d="M23.4 31.6C26.4 31.4 28.6 29.4 28.7 26.6C30.4 28.8 29.7 32.2 27 33.4C25.7 34 24.2 34 23.4 33.7Z" />
+        {/* Binding band */}
+        <rect x="18.2" y="34.8" width="7.6" height="1.8" rx="0.9" />
+        {/* Lower tail */}
+        <path d="M22 37.4C20.9 38.9 20.9 40.4 22 41.8C23.1 40.4 23.1 38.9 22 37.4Z" />
+      </g>
       <path
-        d="M22 18.5c2.2 3.6 2.2 8.4 0 12"
-        fill="none"
+        d="M19.6 37.4C18.2 38.6 18.1 40.2 19.4 41.2M24.4 37.4C25.8 38.6 25.9 40.2 24.6 41.2"
         stroke="white"
-        strokeOpacity={0.1}
-        strokeWidth="0.4"
+        strokeOpacity={0.3}
+        strokeWidth="0.55"
+        fill="none"
+        strokeLinecap="round"
       />
+
+      {/* Level pips */}
+      {pipOffsets.map((dx) => (
+        <path
+          key={dx}
+          d={`M${22 + dx} 51.9L${23.5 + dx} 53.7L${22 + dx} 55.5L${20.5 + dx} 53.7Z`}
+          fill="white"
+          fillOpacity={0.32}
+        />
+      ))}
     </svg>
   );
 }
