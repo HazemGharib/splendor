@@ -1,4 +1,3 @@
-import confetti from 'canvas-confetti';
 import { PlayerColor } from '../models/Player';
 
 const CONFETTI_PALETTES: Record<PlayerColor, string[]> = {
@@ -17,72 +16,86 @@ function prefersReducedMotion(): boolean {
  * Full-screen confetti bursts themed to the winning player's color.
  * Returns a disposer to cancel scheduled bursts (e.g. on unmount).
  * Skipped when the user prefers reduced motion.
+ * canvas-confetti is loaded on demand so it stays out of the initial bundle.
  */
 export function fireWinnerConfetti(winnerColor: PlayerColor): () => void {
   if (prefersReducedMotion()) {
     return () => {};
   }
 
-  const colors = CONFETTI_PALETTES[winnerColor];
-  const zIndex = 100;
+  let cancelled = false;
+  const timers: number[] = [];
+  let sideInterval: number | undefined;
 
-  const fire = (opts: confetti.Options) => {
-    void confetti({
-      colors,
-      zIndex,
-      disableForReducedMotion: true,
-      ...opts,
+  void import('canvas-confetti').then(({ default: confetti }) => {
+    if (cancelled) return;
+
+    const colors = CONFETTI_PALETTES[winnerColor];
+    const zIndex = 100;
+
+    const fire = (opts: confetti.Options) => {
+      if (cancelled) return;
+      void confetti({
+        colors,
+        zIndex,
+        disableForReducedMotion: true,
+        ...opts,
+      });
+    };
+
+    fire({
+      particleCount: 110,
+      spread: 100,
+      origin: { x: 0.5, y: 0.35 },
+      startVelocity: 38,
+      gravity: 1.05,
+      ticks: 280,
+      scalar: 1.05,
     });
-  };
 
-  fire({
-    particleCount: 110,
-    spread: 100,
-    origin: { x: 0.5, y: 0.35 },
-    startVelocity: 38,
-    gravity: 1.05,
-    ticks: 280,
-    scalar: 1.05,
+    timers.push(
+      window.setTimeout(() => {
+        fire({
+          particleCount: 85,
+          spread: 120,
+          origin: { x: 0.5, y: 0.28 },
+          startVelocity: 32,
+          gravity: 1.1,
+          ticks: 260,
+          scalar: 0.95,
+        });
+      }, 240)
+    );
+
+    sideInterval = window.setInterval(() => {
+      fire({
+        particleCount: 4,
+        angle: 60,
+        spread: 52,
+        origin: { x: 0, y: 0.65 },
+        startVelocity: 42,
+        ticks: 200,
+      });
+      fire({
+        particleCount: 4,
+        angle: 120,
+        spread: 52,
+        origin: { x: 1, y: 0.65 },
+        startVelocity: 42,
+        ticks: 200,
+      });
+    }, 320);
+
+    timers.push(
+      window.setTimeout(() => {
+        if (sideInterval !== undefined) window.clearInterval(sideInterval);
+      }, 2600)
+    );
   });
 
-  const secondBurst = window.setTimeout(() => {
-    fire({
-      particleCount: 85,
-      spread: 120,
-      origin: { x: 0.5, y: 0.28 },
-      startVelocity: 32,
-      gravity: 1.1,
-      ticks: 260,
-      scalar: 0.95,
-    });
-  }, 240);
-
-  const sideInterval = window.setInterval(() => {
-    fire({
-      particleCount: 4,
-      angle: 60,
-      spread: 52,
-      origin: { x: 0, y: 0.65 },
-      startVelocity: 42,
-      ticks: 200,
-    });
-    fire({
-      particleCount: 4,
-      angle: 120,
-      spread: 52,
-      origin: { x: 1, y: 0.65 },
-      startVelocity: 42,
-      ticks: 200,
-    });
-  }, 320);
-
-  const stopSides = window.setTimeout(() => {
-    window.clearInterval(sideInterval);
-  }, 2600);
-
   return () => {
-    window.clearTimeout(secondBurst);
-    window.clearInterval(sideInterval);
-    window.clearTimeout(stopSides);
+    cancelled = true;
+    for (const id of timers) window.clearTimeout(id);
+    if (sideInterval !== undefined) window.clearInterval(sideInterval);
   };
 }

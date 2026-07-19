@@ -31,8 +31,6 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-initAnalytics();
-
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ErrorBoundary>
@@ -40,4 +38,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </ErrorBoundary>
   </React.StrictMode>
 );
+
+// Defer analytics until after first paint so PostHog doesn't compete with the critical path.
+const scheduleIdle =
+  typeof window !== 'undefined' && 'requestIdleCallback' in window
+    ? window.requestIdleCallback.bind(window)
+    : (cb: () => void) => window.setTimeout(cb, 1);
+scheduleIdle(() => initAnalytics());
 

@@ -1,22 +1,28 @@
-import { useEffect, useState, useRef } from 'react';
+import { lazy, Suspense, useEffect, useState, useRef } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { GamePhase } from '../../models/GameState';
 import { CardMarket } from './CardMarket';
 import { NobleMarket } from './NobleMarket';
 import { PlayerArea } from '../game/Player/PlayerArea';
 import { GameSetup } from '../ui/GameSetup';
-import { WinnerModal } from '../ui/WinnerModal';
 import { SettingsModal } from '../ui/SettingsModal';
 import { HelpModal } from '../ui/HelpModal';
 import { TurnIndicator } from '../ui/TurnIndicator';
 import { TokenSelector } from '../ui/TokenSelector';
-import { DebugPanel } from '../debug/DebugPanel';
 import { NobleVisitAnnouncement } from '../ui/NobleVisitAnnouncement';
 import { GemColor } from '../../models/Card';
 import { AIService } from '../../services/AIService';
 import { useSplendorTitleDebugTap } from '../../hooks/useDebugEasterEgg';
 import { useCardActionAnimation } from '../../hooks/useCardActionAnimation';
 import { trackEvent } from '../../services/analytics/posthogClient';
+
+/** Rare UI: only load when a winner exists / debug mode is opened. */
+const WinnerModal = lazy(() =>
+  import('../ui/WinnerModal').then((m) => ({ default: m.WinnerModal }))
+);
+const DebugPanel = lazy(() =>
+  import('../debug/DebugPanel').then((m) => ({ default: m.DebugPanel }))
+);
 
 export function GameBoard() {
   const state = useGameStore();
@@ -28,7 +34,8 @@ export function GameBoard() {
     tokenSupply, 
     nobles, 
     winner,
-    hasPerformedAction 
+    hasPerformedAction,
+    debugMode,
   } = state;
   const { 
     purchaseCard, 
@@ -351,9 +358,11 @@ export function GameBoard() {
         </div>
       </div>
       
-      {winner && <WinnerModal winner={winner} />}
+      <Suspense fallback={null}>
+        {winner && <WinnerModal winner={winner} />}
+        {debugMode && <DebugPanel />}
+      </Suspense>
       <NobleVisitAnnouncement />
-      <DebugPanel />
     </div>
   );
 }

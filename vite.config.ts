@@ -74,5 +74,33 @@ export default defineConfig({
     target: 'es2020',
     sourcemap: true,
     minify: 'esbuild',
+    // Keep vendor libs cacheable and parallel-downloadable; app code stays lean.
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return;
+
+          if (id.includes('posthog-js') || id.includes('/posthog-')) {
+            return 'vendor-posthog';
+          }
+          if (id.includes('@radix-ui')) {
+            return 'vendor-radix';
+          }
+          if (id.includes('canvas-confetti')) {
+            return 'vendor-confetti';
+          }
+          if (id.includes('zustand') || id.includes('/immer/') || id.includes('\\immer\\')) {
+            return 'vendor-state';
+          }
+          if (
+            id.includes('node_modules/react-dom') ||
+            id.includes('node_modules/react/') ||
+            id.includes('node_modules/scheduler')
+          ) {
+            return 'vendor-react';
+          }
+        },
+      },
+    },
   },
 });
