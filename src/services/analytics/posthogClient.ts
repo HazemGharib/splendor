@@ -152,7 +152,7 @@ function loadPosthog(): Promise<PostHog | null> {
         capture_pageleave: true,
         // No feature flags in-app — skip /flags round-trip on the critical path.
         advanced_disable_feature_flags: true,
-        disable_session_recording: true,
+        disable_session_recording: false,
         advanced_disable_toolbar_metrics: !import.meta.env.DEV,
         persistence: 'localStorage+cookie',
       });
