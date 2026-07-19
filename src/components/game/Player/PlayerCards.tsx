@@ -51,10 +51,12 @@ export function PlayerCards({ cards }: PlayerCardsProps) {
                       zIndex: index,
                     }}
                   >
-                    <img 
-                      src={backgroundUrl} 
-                      alt="" 
+                    <img
+                      src={backgroundUrl}
+                      alt=""
                       className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
                     />
                     <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/30" />
                     <div className="absolute top-1 left-1">

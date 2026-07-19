@@ -28,10 +28,12 @@ export function NobleTile({ noble, onClick, disabled, isMarket }: NobleTileProps
     >
       <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-purple-900 to-transparent z-10 p-4" />
       
-      <img 
-        src={portraitUrl} 
+      <img
+        src={portraitUrl}
         alt={noble.name}
         className="w-full h-full object-cover"
+        loading="lazy"
+        decoding="async"
       />
       
       <div className="flex justify-center mt-2 absolute top-6 right-1">

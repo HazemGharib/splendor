@@ -11,7 +11,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 2",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
     "type-check": "tsc --noEmit",
-    "icons:round": "node scripts/round-public-icons.mjs"
+    "icons:round": "node scripts/round-public-icons.mjs",
+    "assets:webp": "node scripts/convert-assets-to-webp.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

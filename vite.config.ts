@@ -1,10 +1,41 @@
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+
+/**
+ * Convert render-blocking stylesheets into preload + async apply so CSS
+ * doesn't delay first paint / LCP. Critical paint colors stay inlined in index.html.
+ */
+function nonBlockingCss(): Plugin {
+  return {
+    name: 'non-blocking-css',
+    transformIndexHtml: {
+      order: 'post',
+      handler(html) {
+        return html.replace(
+          /<link([^>]*\s)?rel="stylesheet"([^>]*)>/gi,
+          (_match, before = '', after = '') => {
+            const attrs = `${before} ${after}`.replace(/\s+/g, ' ').trim();
+            const href = attrs.match(/href="([^"]+)"/)?.[1];
+            if (!href) return _match;
+
+            const crossorigin = /\bcrossorigin\b/.test(attrs) ? ' crossorigin' : '';
+            return [
+              `<link rel="preload" as="style" href="${href}"${crossorigin}>`,
+              `<link rel="stylesheet" href="${href}"${crossorigin} media="print" onload="this.media='all'">`,
+              `<noscript><link rel="stylesheet" href="${href}"${crossorigin}></noscript>`,
+            ].join('');
+          }
+        );
+      },
+    },
+  };
+}
 
 export default defineConfig({
   plugins: [
     react(),
+    nonBlockingCss(),
     VitePWA({
       strategies: 'injectManifest',
       srcDir: 'src',
@@ -48,15 +79,15 @@ export default defineConfig({
         ],
         screenshots: [
           {
-            src: '/assets/screenshot-desktop.png',
+            src: '/assets/screenshot-desktop.webp',
             sizes: '1920x1080',
-            type: 'image/png',
+            type: 'image/webp',
             form_factor: 'wide'
           },
           {
-            src: '/assets/screenshot-mobile.png',
-            sizes: '750x1334',
-            type: 'image/png',
+            src: '/assets/screenshot-mobile.webp',
+            sizes: '458x717',
+            type: 'image/webp',
             form_factor: 'narrow'
           }
         ]

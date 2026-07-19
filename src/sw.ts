@@ -49,7 +49,7 @@ precacheAndRoute(dedupePrecacheManifest(self.__WB_MANIFEST));
 // App shell routing - serve index.html for navigation requests
 const handler = createHandlerBoundToURL('/index.html');
 const navigationRoute = new NavigationRoute(handler, {
-  denylist: [/^\/api\//, /^\/auth\//], // Exclude API routes if any
+  denylist: [/^\/api\//, /^\/auth\//, /^\/robots\.txt$/, /^\/sitemap\.xml$/],
 });
 registerRoute(navigationRoute);
 

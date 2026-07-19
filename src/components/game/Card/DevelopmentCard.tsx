@@ -95,6 +95,8 @@ export function DevelopmentCardComponent({
         alt=""
         className="absolute inset-0 w-full h-full object-cover"
         draggable={false}
+        loading="lazy"
+        decoding="async"
       />
 
       <div className="relative z-10 p-3 flex flex-col h-full">

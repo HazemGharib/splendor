@@ -150,6 +150,9 @@ function loadPosthog(): Promise<PostHog | null> {
         opt_out_capturing_persistence_type: 'localStorage',
         capture_pageview: true,
         capture_pageleave: true,
+        // No feature flags in-app — skip /flags round-trip on the critical path.
+        advanced_disable_feature_flags: true,
+        disable_session_recording: true,
         advanced_disable_toolbar_metrics: !import.meta.env.DEV,
         persistence: 'localStorage+cookie',
       });
@@ -174,7 +177,9 @@ function loadPosthog(): Promise<PostHog | null> {
   return loadPromise;
 }
 
+/** Load PostHog only when the user has already consented (returning visitors). */
 export function initAnalytics(): void {
+  if (getStoredConsent() !== 'accepted') return;
   void loadPosthog();
 }
 
@@ -196,9 +201,8 @@ export function acceptAnalyticsConsent(): void {
 export function rejectAnalyticsConsent(): void {
   setStoredConsent('rejected');
   writePendingEvents([]);
-  void loadPosthog().then((posthog) => {
-    posthog?.opt_out_capturing();
-  });
+  // Avoid downloading posthog-js just to opt out; default is already opted out.
+  posthogInstance?.opt_out_capturing();
 }
 
 /**

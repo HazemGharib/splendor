@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, type ImgHTMLAttributes } from 'react';
 import { Button } from '../design-system/Button';
 import { useSplendorTitleDebugTap } from '../../hooks/useDebugEasterEgg';
 import { PlayerColor, assignPlayerColors } from '../../models/Player';
@@ -15,6 +15,11 @@ interface GameSetupProps {
   hasSavedGame?: boolean;
   onContinueSavedGame?: () => void;
 }
+
+/** React 18: runtime wants lowercase `fetchpriority`; @types/react only types `fetchPriority`. */
+const splashFetchPriority = {
+  fetchpriority: 'high',
+} as ImgHTMLAttributes<HTMLImageElement>;
 
 const colorChoice: { value: PlayerColor; swatch: string }[] = [
   { value: PlayerColor.RED, swatch: 'bg-red-500 ring-red-400' },
@@ -105,9 +110,11 @@ export function GameSetup({
       <div className="min-h-screen flex flex-col lg:flex-row">
         <div className="relative w-full lg:w-[60%] h-[36vh] sm:h-[40vh] lg:h-screen flex-shrink-0">
           <img
-            src="/assets/splendor-splash.png"
+            src="/assets/splendor-splash.webp"
             alt="Splendor"
             className="w-full h-full object-cover"
+            {...splashFetchPriority}
+            decoding="async"
           />
           <div className="absolute inset-0 bg-gradient-to-b lg:bg-gradient-to-r from-transparent via-gray-950/30 to-gray-950 lg:from-gray-950/60 lg:via-gray-950/0 lg:to-gray-950/95" />
         </div>
