@@ -193,7 +193,7 @@ export function TokenSelector({ supply, playerTokens, onTakeTokens, disabled }: 
             <div
               key={color}
               className={cn(
-                'gem-token-hit relative flex min-h-[52px] min-w-[52px] items-center justify-center rounded-xl p-2 touch-manipulation',
+                'gem-token-hit relative flex min-h-[52px] min-w-[52px] items-center justify-center rounded-xl p-2 m-4 touch-manipulation',
                 !isCollectingThis && 'transition-all duration-200 ease-out',
                 isSelected && !isCollectingThis && 'bg-yellow-500/15 ring-2 ring-yellow-400/80 shadow-md shadow-yellow-500/20',
                 justSelected === color && 'token-select-pop',

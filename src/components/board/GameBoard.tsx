@@ -278,9 +278,9 @@ export function GameBoard() {
           </div>
         )}
 
-        {/* Turn indicator — tablet+ */}
+        {/* Sticky turn indicator — tablet+ */}
         {currentPlayer && (
-          <div className="mb-3 hidden sm:block">
+          <div className="sticky top-0 z-30 -mx-4 mb-3 hidden bg-[#070a12]/85 px-4 py-2 backdrop-blur-md sm:block lg:-mx-6 lg:px-6">
             <TurnIndicator
               currentPlayer={currentPlayer}
               hasPerformedAction={hasPerformedAction}
