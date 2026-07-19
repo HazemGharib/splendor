@@ -150,8 +150,7 @@ function loadPosthog(): Promise<PostHog | null> {
         opt_out_capturing_persistence_type: 'localStorage',
         capture_pageview: true,
         capture_pageleave: true,
-        // No feature flags in-app — skip /flags round-trip on the critical path.
-        advanced_disable_feature_flags: true,
+        advanced_disable_feature_flags: false,
         disable_session_recording: false,
         advanced_disable_toolbar_metrics: !import.meta.env.DEV,
         persistence: 'localStorage+cookie',
