@@ -210,7 +210,7 @@ export function DebugPanel() {
   }, [debugMode]);
 
   useEffect(() => {
-    if (!debugMode) return;
+    if (!debugMode || !import.meta.env.DEV) return;
 
     let cancelled = false;
     setUniqueVisitorsLoading(true);
@@ -405,6 +405,7 @@ export function DebugPanel() {
 
       {/* Content */}
       <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+        {import.meta.env.DEV && (
         <div className="mb-3 rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-3">
           <div className="text-xs uppercase tracking-wide text-emerald-300 font-semibold">
             Analytics Insight (PostHog)
@@ -499,6 +500,7 @@ export function DebugPanel() {
             )}
           </div>
         </div>
+        )}
 
         {selectedTab === 'tokens' && (
           <div className="space-y-4">
