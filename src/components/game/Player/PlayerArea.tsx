@@ -39,7 +39,7 @@ const playerAccentClasses: Record<PlayerColor, string> = {
   [PlayerColor.YELLOW]: 'from-yellow-500/20 to-yellow-900/40',
 };
 
-function PlayerDetails({
+export function PlayerDetails({
   player,
   isCurrentPlayer,
   onPurchaseReserved,

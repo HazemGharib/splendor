@@ -30,13 +30,16 @@ export function ReservedCards({
       <div className="text-xs text-gray-200 mb-2 font-medium">
         Reserved Cards ({cards.length}/3)
       </div>
-      <div className="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2 sm:mx-0 sm:px-0">
+      {/* Container end-padding isn't reliably scrollable (and the -mx bleed gets
+          clipped by ancestor overflow-hidden), so each card wrapper reserves its
+          own ring room (p-0.5) inside the scrollport; pt covers the hover lift. */}
+      <div className="-mx-2 flex gap-1 overflow-x-auto px-2 pb-2 pt-1.5">
         {cards.map((card) => {
           const canAfford = RuleEngine.canAffordCard(card.cost, playerTokens, playerBonuses);
           const isAnimating = animatingCardId === card.id;
 
           return (
-            <div key={card.id} className="flex-shrink-0">
+            <div key={card.id} className="flex-shrink-0 p-0.5">
               <DevelopmentCardComponent
                 card={card}
                 affordable={canAfford}

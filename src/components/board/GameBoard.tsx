@@ -235,13 +235,11 @@ export function GameBoard() {
 
   const isCurrentPlayerAI = currentPlayer?.isAI || false;
 
-  const playerEntries = players.map((player, index) => ({ player, index }));
-  const sortedPlayerEntries = [...playerEntries].sort((a, b) => {
-    const aCurrent = a.index === currentPlayerIndex && phase === GamePhase.PLAYING;
-    const bCurrent = b.index === currentPlayerIndex && phase === GamePhase.PLAYING;
-    if (aCurrent === bCurrent) return a.index - b.index;
-    return aCurrent ? -1 : 1;
-  });
+  // The current player's full details live under the turn indicator,
+  // so the sidebar only lists the other players.
+  const otherPlayerEntries = players
+    .map((player, index) => ({ player, index }))
+    .filter(({ index }) => !currentPlayer || index !== currentPlayerIndex);
 
   return (
     <div className="app-bg min-h-dvh px-safe pb-safe pt-safe">
@@ -273,6 +271,9 @@ export function GameBoard() {
               currentPlayer={currentPlayer}
               hasPerformedAction={hasPerformedAction}
               isAIThinking={isAIThinking}
+              onPurchaseReserved={handlePurchaseReserved}
+              animatingCardId={animatingCard?.id ?? null}
+              animatingCardType={animatingCard?.type ?? null}
             />
           </div>
         )}
@@ -284,6 +285,9 @@ export function GameBoard() {
               currentPlayer={currentPlayer}
               hasPerformedAction={hasPerformedAction}
               isAIThinking={isAIThinking}
+              onPurchaseReserved={handlePurchaseReserved}
+              animatingCardId={animatingCard?.id ?? null}
+              animatingCardType={animatingCard?.type ?? null}
             />
           </div>
         )}
@@ -315,22 +319,18 @@ export function GameBoard() {
               />
             )}
 
-            {sortedPlayerEntries.map(({ player, index }) => {
-              const isCurrent = index === currentPlayerIndex && phase === GamePhase.PLAYING;
-
-              return (
-                <PlayerArea
-                  key={player.id}
-                  player={player}
-                  isCurrentPlayer={isCurrent}
-                  onPurchaseReserved={handlePurchaseReserved}
-                  hasPerformedAction={hasPerformedAction}
-                  animatingCardId={animatingCard?.id ?? null}
-                  animatingCardType={animatingCard?.type ?? null}
-                  compact={!isCurrent}
-                />
-              );
-            })}
+            {otherPlayerEntries.map(({ player }) => (
+              <PlayerArea
+                key={player.id}
+                player={player}
+                isCurrentPlayer={false}
+                onPurchaseReserved={handlePurchaseReserved}
+                hasPerformedAction={hasPerformedAction}
+                animatingCardId={animatingCard?.id ?? null}
+                animatingCardType={animatingCard?.type ?? null}
+                compact
+              />
+            ))}
           </aside>
 
           {/* Card market (second on mobile) */}
