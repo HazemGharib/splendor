@@ -213,17 +213,12 @@ export function DebugPanel() {
     if (!debugMode) return;
 
     let cancelled = false;
-    Promise.resolve().then(() => {
-      if (!cancelled) {
-        setUniqueVisitorsLoading(true);
-        setUniqueVisitorsError(null);
-        setUsersByRegionError(null);
-      }
-    });
+    setUniqueVisitorsLoading(true);
+    setUniqueVisitorsError(null);
+    setUsersByRegionError(null);
 
     (async () => {
       try {
-        if (!import.meta.env.DEV) return;
         const mod = await import('../../services/analytics/posthogDebugInsights');
         const [uniqueResult, byRegionResult] = await Promise.all([
           mod.fetchUniqueVisitorsLast30Days(),

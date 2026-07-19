@@ -84,10 +84,6 @@ export async function fetchUniqueVisitorsLast30Days(): Promise<UniqueVisitorsIns
     return { ...cache, fromCache: true };
   }
 
-  if (!import.meta.env.DEV) {
-    throw new Error('Unique visitors insight is debug-only and available in development mode.');
-  }
-
   const apiHost = import.meta.env.VITE_PUBLIC_POSTHOG_HOST ?? 'https://us.i.posthog.com';
   const projectId = import.meta.env.VITE_POSTHOG_PROJECT_ID;
   const personalApiKey = import.meta.env.VITE_POSTHOG_PERSONAL_API_KEY;
@@ -147,10 +143,6 @@ export async function fetchUsersByCountryRegionCityLast30Days(): Promise<UsersBy
   const now = Date.now();
   if (cache && now - cache.fetchedAt < UNIQUE_VISITORS_CACHE_TTL_MS) {
     return { ...cache, fromCache: true };
-  }
-
-  if (!import.meta.env.DEV) {
-    throw new Error('Users-by-region insight is debug-only and available in development mode.');
   }
 
   const apiHost = import.meta.env.VITE_PUBLIC_POSTHOG_HOST ?? 'https://us.i.posthog.com';
